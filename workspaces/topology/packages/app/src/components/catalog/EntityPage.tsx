@@ -120,7 +120,7 @@ const entityWarningContent = (
   <>
     <EntitySwitch>
       <EntitySwitch.Case if={isOrphan}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityOrphanWarning />
         </Grid>
       </EntitySwitch.Case>
@@ -128,7 +128,7 @@ const entityWarningContent = (
 
     <EntitySwitch>
       <EntitySwitch.Case if={hasRelationWarnings}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityRelationWarning />
         </Grid>
       </EntitySwitch.Case>
@@ -136,7 +136,7 @@ const entityWarningContent = (
 
     <EntitySwitch>
       <EntitySwitch.Case if={hasCatalogProcessingErrors}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityProcessingErrorsPanel />
         </Grid>
       </EntitySwitch.Case>
@@ -147,17 +147,17 @@ const entityWarningContent = (
 const overviewContent = (
   <Grid container spacing={3} alignItems="stretch">
     {entityWarningContent}
-    <Grid item md={6}>
+    <Grid size={6}>
       <EntityAboutCard variant="gridItem" />
     </Grid>
-    <Grid item md={6} xs={12}>
+    <Grid size={{ xs: 12, md: 6 }}>
       <EntityCatalogGraphCard variant="gridItem" height={400} />
     </Grid>
 
-    <Grid item md={4} xs={12}>
+    <Grid size={{ xs: 12, md: 4 }}>
       <EntityLinksCard />
     </Grid>
-    <Grid item md={8} xs={12}>
+    <Grid size={{ xs: 12, md: 8 }}>
       <EntityHasSubcomponentsCard variant="gridItem" />
     </Grid>
   </Grid>
@@ -187,10 +187,10 @@ const serviceEntityPage = (
 
     <EntityLayout.Route path="/api" title="API">
       <Grid container spacing={3} alignItems="stretch">
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityProvidedApisCard />
         </Grid>
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityConsumedApisCard />
         </Grid>
       </Grid>
@@ -198,10 +198,10 @@ const serviceEntityPage = (
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
       <Grid container spacing={3} alignItems="stretch">
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityDependsOnComponentsCard variant="gridItem" />
         </Grid>
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityDependsOnResourcesCard variant="gridItem" />
         </Grid>
       </Grid>
@@ -233,10 +233,10 @@ const websiteEntityPage = (
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
       <Grid container spacing={3} alignItems="stretch">
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityDependsOnComponentsCard variant="gridItem" />
         </Grid>
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityDependsOnResourcesCard variant="gridItem" />
         </Grid>
       </Grid>
@@ -286,20 +286,20 @@ const apiPage = (
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3}>
         {entityWarningContent}
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityAboutCard />
         </Grid>
-        <Grid item md={6} xs={12}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityCatalogGraphCard variant="gridItem" height={400} />
         </Grid>
-        <Grid item md={4} xs={12}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <EntityLinksCard />
         </Grid>
-        <Grid container item md={12}>
-          <Grid item md={6}>
+        <Grid container size={12}>
+          <Grid size={6}>
             <EntityProvidingComponentsCard />
           </Grid>
-          <Grid item md={6}>
+          <Grid size={6}>
             <EntityConsumingComponentsCard />
           </Grid>
         </Grid>
@@ -308,7 +308,7 @@ const apiPage = (
 
     <EntityLayout.Route path="/definition" title="Definition">
       <Grid container spacing={3}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityApiDefinitionCard />
         </Grid>
       </Grid>
@@ -321,10 +321,10 @@ const userPage = (
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3}>
         {entityWarningContent}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityUserProfileCard variant="gridItem" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityOwnershipCard variant="gridItem" />
         </Grid>
       </Grid>
@@ -337,16 +337,16 @@ const groupPage = (
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3}>
         {entityWarningContent}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityGroupProfileCard variant="gridItem" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityOwnershipCard variant="gridItem" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityMembersListCard />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityLinksCard />
         </Grid>
       </Grid>
@@ -359,22 +359,22 @@ const systemPage = (
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3} alignItems="stretch">
         {entityWarningContent}
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityAboutCard variant="gridItem" />
         </Grid>
-        <Grid item md={6} xs={12}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityCatalogGraphCard variant="gridItem" height={400} />
         </Grid>
-        <Grid item md={4} xs={12}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <EntityLinksCard />
         </Grid>
-        <Grid item md={8}>
+        <Grid size={8}>
           <EntityHasComponentsCard variant="gridItem" />
         </Grid>
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityHasApisCard variant="gridItem" />
         </Grid>
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityHasResourcesCard variant="gridItem" />
         </Grid>
       </Grid>
@@ -406,13 +406,13 @@ const domainPage = (
     <EntityLayout.Route path="/" title="Overview">
       <Grid container spacing={3} alignItems="stretch">
         {entityWarningContent}
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityAboutCard variant="gridItem" />
         </Grid>
-        <Grid item md={6} xs={12}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <EntityCatalogGraphCard variant="gridItem" height={400} />
         </Grid>
-        <Grid item md={6}>
+        <Grid size={6}>
           <EntityHasSystemsCard variant="gridItem" />
         </Grid>
       </Grid>

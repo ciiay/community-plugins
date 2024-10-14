@@ -37,7 +37,7 @@ export const ContainerSelector = ({
       onChange={onContainerChange}
       label="Container"
       style={{ marginLeft: '20px' }}
-      value={containerSelected}
+      value={{ value: containerSelected }}
       data-testid="container-select"
     >
       {containersList.map(container => {
