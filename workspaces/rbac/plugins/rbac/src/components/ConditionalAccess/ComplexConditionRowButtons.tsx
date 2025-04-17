@@ -25,6 +25,7 @@ import { getDefaultRule } from '../../utils/conditional-access-utils';
 import { tooltipTitle } from './AddNestedConditionButton';
 import { criterias } from './const';
 import { Condition, ConditionsData } from './types';
+import Typography from '@mui/material/Typography';
 
 type ComplexConditionRowButtonsProps = {
   conditionRow: ConditionsData;
@@ -73,11 +74,12 @@ export const ComplexConditionRowButtons = ({
   return (
     (criteria === criterias.allOf || criteria === criterias.anyOf) && (
       <Box
-        mt={1}
-        mb={1}
+        mt={2}
         sx={{
           display: 'flex',
           flexDirection: 'column',
+          justifyContent: 'space-between',
+          gap: 1,
           alignItems: 'flex-start',
         }}
       >
@@ -89,7 +91,9 @@ export const ComplexConditionRowButtons = ({
           onClick={handleAddRule}
           startIcon={<AddIcon fontSize="small" />}
         >
-          Add rule
+          <Typography variant="body2" component="span">
+            Add rule
+          </Typography>
         </Button>
         <Button
           sx={{
@@ -98,16 +102,13 @@ export const ComplexConditionRowButtons = ({
           size="small"
           onClick={() => handleAddNestedCondition(criteria)}
           startIcon={<AddIcon fontSize="small" />}
-          endIcon={
-            <Tooltip title={tooltipTitle()} placement="top">
-              <HelpOutlineIcon
-                fontSize="small"
-                style={{ marginLeft: '0.25rem' }}
-              />
-            </Tooltip>
-          }
         >
-          Add Nested Condition
+          <Typography variant="body2" component="span">
+            Add nested condition
+          </Typography>
+          <Tooltip title={tooltipTitle()} placement="top">
+            <HelpOutlineIcon fontSize="inherit" style={{ marginLeft: 4 }} />
+          </Tooltip>
         </Button>
       </Box>
     )
