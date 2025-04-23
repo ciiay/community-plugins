@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { default as React } from 'react';
 import { Button, Grid } from '@material-ui/core';
 import {
   EntityApiDefinitionCard,
@@ -67,6 +68,7 @@ import {
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
+import { ServicenowPage } from '@backstage-community/plugin-servicenow';
 
 import {
   EntityKubernetesContent,
@@ -168,6 +170,10 @@ const serviceEntityPage = (
       {cicdContent}
     </EntityLayout.Route>
 
+    <EntityLayout.Route path="/servicenow" title="Servicenow">
+      <ServicenowPage />
+    </EntityLayout.Route>
+
     <EntityLayout.Route
       path="/kubernetes"
       title="Kubernetes"
@@ -212,6 +218,10 @@ const websiteEntityPage = (
 
     <EntityLayout.Route path="/ci-cd" title="CI/CD">
       {cicdContent}
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/servicenow" title="Servicenow">
+      <ServicenowPage />
     </EntityLayout.Route>
 
     <EntityLayout.Route
