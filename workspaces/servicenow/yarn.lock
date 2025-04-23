@@ -2751,7 +2751,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage-community/plugin-servicenow-backend@workspace:plugins/servicenow-backend":
+"@backstage-community/plugin-servicenow-backend@workspace:^, @backstage-community/plugin-servicenow-backend@workspace:plugins/servicenow-backend":
   version: 0.0.0-use.local
   resolution: "@backstage-community/plugin-servicenow-backend@workspace:plugins/servicenow-backend"
   dependencies:
@@ -2771,7 +2771,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@backstage-community/plugin-servicenow@workspace:plugins/servicenow":
+"@backstage-community/plugin-servicenow@workspace:^, @backstage-community/plugin-servicenow@workspace:plugins/servicenow":
   version: 0.0.0-use.local
   resolution: "@backstage-community/plugin-servicenow@workspace:plugins/servicenow"
   dependencies:
@@ -14805,6 +14805,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app@workspace:packages/app"
   dependencies:
+    "@backstage-community/plugin-servicenow": "workspace:^"
     "@backstage/app-defaults": "npm:^1.6.1"
     "@backstage/canon": "npm:^0.3.0"
     "@backstage/catalog-model": "npm:^1.7.3"
@@ -15472,6 +15473,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "backend@workspace:packages/backend"
   dependencies:
+    "@backstage-community/plugin-servicenow-backend": "workspace:^"
     "@backstage/backend-defaults": "npm:^0.9.0"
     "@backstage/cli": "npm:^0.32.0"
     "@backstage/config": "npm:^1.3.2"
@@ -30624,6 +30626,14 @@ __metadata:
   checksum: 10/7fa9d9c68090f6289976b34fc13c50ac8cd7f16ae6bce08d16459300f7fc61fbc2d7ebfa02884c073ec9d6ab9e7e704c89561882bbe338e99fcacb2912fde737
   languageName: node
   linkType: hard
+
+"servicenow-common-af8a70@workspace:plugins/servicenow-common":
+  version: 0.0.0-use.local
+  resolution: "servicenow-common-af8a70@workspace:plugins/servicenow-common"
+  dependencies:
+    "@backstage/cli": "npm:^0.32.0"
+  languageName: unknown
+  linkType: soft
 
 "set-cookie-parser@npm:^2.4.6":
   version: 2.7.1

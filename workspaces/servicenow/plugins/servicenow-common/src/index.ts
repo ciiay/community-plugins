@@ -13,10 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
-import '@backstage/cli/asset-types';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import '@backstage/canon/css/styles.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
+/**
+ * Common functionalities for the servicenow plugin.
+ *
+ * @packageDocumentation
+ */
+
+/**
+ * In this package you might for example declare types that are common
+ * between the frontend and backend plugin packages.
+ */
+export type CommonType = {
+  field: string;
+};
+
+/**
+ * Or you might declare some common constants.
+ */
+export const COMMON_CONSTANT = 1;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { default as React } from 'react';
 import { ExampleComponent } from './ExampleComponent';
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
@@ -33,6 +34,6 @@ describe('ExampleComponent', () => {
 
   it('should render', async () => {
     await renderInTestApp(<ExampleComponent />);
-    expect(screen.getByText('Welcome to servicenow!')).toBeInTheDocument();
+    expect(screen.getByText('Welcome to Servicenow!')).toBeInTheDocument();
   });
 });

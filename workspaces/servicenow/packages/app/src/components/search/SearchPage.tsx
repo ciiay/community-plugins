@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { default as React } from 'react';
 import { makeStyles, Theme, Grid, Paper } from '@material-ui/core';
 
 import { CatalogSearchResultListItem } from '@backstage/plugin-catalog';

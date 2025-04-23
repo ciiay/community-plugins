@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { default as React } from 'react';
 import { Typography, Grid } from '@material-ui/core';
 import {
   InfoCard,
@@ -27,7 +28,7 @@ import { ExampleFetchComponent } from '../ExampleFetchComponent';
 
 export const ExampleComponent = () => (
   <Page themeId="tool">
-    <Header title="Welcome to servicenow!" subtitle="Optional subtitle">
+    <Header title="Welcome to Servicenow!" subtitle="Optional subtitle">
       <HeaderLabel label="Owner" value="Team X" />
       <HeaderLabel label="Lifecycle" value="Alpha" />
     </Header>
