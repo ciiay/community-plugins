@@ -2755,6 +2755,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@backstage-community/plugin-servicenow-backend@workspace:plugins/servicenow-backend"
   dependencies:
+    "@backstage-community/plugin-servicenow-common": "workspace:^"
     "@backstage/backend-defaults": "npm:^0.9.0"
     "@backstage/backend-plugin-api": "npm:^1.3.0"
     "@backstage/backend-test-utils": "npm:^1.4.0"
@@ -2768,6 +2769,14 @@ __metadata:
     express-promise-router: "npm:^4.1.0"
     supertest: "npm:^6.2.4"
     zod: "npm:^3.22.4"
+  languageName: unknown
+  linkType: soft
+
+"@backstage-community/plugin-servicenow-common@workspace:^, @backstage-community/plugin-servicenow-common@workspace:plugins/servicenow-common":
+  version: 0.0.0-use.local
+  resolution: "@backstage-community/plugin-servicenow-common@workspace:plugins/servicenow-common"
+  dependencies:
+    "@backstage/cli": "npm:^0.32.0"
   languageName: unknown
   linkType: soft
 
@@ -30626,14 +30635,6 @@ __metadata:
   checksum: 10/7fa9d9c68090f6289976b34fc13c50ac8cd7f16ae6bce08d16459300f7fc61fbc2d7ebfa02884c073ec9d6ab9e7e704c89561882bbe338e99fcacb2912fde737
   languageName: node
   linkType: hard
-
-"servicenow-common-af8a70@workspace:plugins/servicenow-common":
-  version: 0.0.0-use.local
-  resolution: "servicenow-common-af8a70@workspace:plugins/servicenow-common"
-  dependencies:
-    "@backstage/cli": "npm:^0.32.0"
-  languageName: unknown
-  linkType: soft
 
 "set-cookie-parser@npm:^2.4.6":
   version: 2.7.1
