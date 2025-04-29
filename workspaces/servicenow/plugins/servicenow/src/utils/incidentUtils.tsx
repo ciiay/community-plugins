@@ -17,13 +17,13 @@ import { default as React } from 'react';
 import LabelImportantIcon from '@mui/icons-material/LabelImportant';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
-import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
-import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
 import { ModerateIcon } from '../components/Servicenow/ModerateIcon';
 import { InProgressIcon } from '../components/Servicenow/InProgressIcon';
+import { ClosedIcon } from '../components/Servicenow/ClosedIcon';
 
 import Typography from '@mui/material/Typography';
 
@@ -34,7 +34,7 @@ interface StatusData {
   transform?: string;
 }
 
-const iconStyleBase = { marginRight: 4 };
+const iconStyleBase = { marginRight: 8 };
 const typographyStyleBase = { display: 'flex', alignItems: 'center' };
 
 const PRIORITY_MAP: Record<number, StatusData> = {
@@ -44,19 +44,19 @@ const PRIORITY_MAP: Record<number, StatusData> = {
     label: 'Critical',
     transform: 'rotate(-90deg)',
   },
-  2: { Icon: KeyboardDoubleArrowUpIcon, color: '#C9190B', label: 'High' },
+  2: { Icon: KeyboardDoubleArrowUpIcon, color: '#EC7A08', label: 'High' },
   3: { Icon: ModerateIcon, color: '#F0AB00', label: 'Moderate' },
   4: { Icon: KeyboardDoubleArrowDownIcon, color: '#2B9AF3', label: 'Low' },
-  5: { Icon: PendingActionsOutlinedIcon, color: '#2B9AF3', label: 'Planning' },
+  5: { Icon: FormatListNumberedIcon, color: '#6A6E73', label: 'Planning' },
 };
 
 const INCIDENT_STATE_MAP: Record<number, StatusData> = {
   1: { Icon: PendingOutlinedIcon, color: '#6A6E73', label: 'New' },
   2: { Icon: InProgressIcon, color: '#6A6E73', label: 'In Progress' },
-  3: { Icon: PauseCircleOutlineIcon, color: '#F0AB00', label: 'On Hold' },
+  3: { Icon: PauseCircleOutlineIcon, color: '#6A6E73', label: 'On Hold' },
   6: { Icon: CheckCircleOutlineIcon, color: '#3E8635', label: 'Resolved' },
-  7: { Icon: CheckCircleOutlineIcon, color: '#3E8635', label: 'Closed' },
-  8: { Icon: DoDisturbAltIcon, color: '#6A6E73', label: 'Cancelled' },
+  7: { Icon: ClosedIcon, color: '#6A6E73', label: 'Closed' },
+  8: { Icon: ClosedIcon, color: '#6A6E73', label: 'Cancelled' },
 };
 
 const renderStatusLabel = (data?: StatusData) => {
