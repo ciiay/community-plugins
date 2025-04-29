@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 The Backstage Authors
+ * Copyright 2024 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
-import '@backstage/cli/asset-types';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import '@backstage/canon/css/styles.css';
+export type IncidentsData = {
+  number: string;
+  shortDescription: string;
+  description: string;
+  sysCreatedOn: string;
+  priority: number;
+  severity: number;
+  incidentState: number;
+};
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
+export enum SortingOrderEnum {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
+export type Order = 'asc' | 'desc';

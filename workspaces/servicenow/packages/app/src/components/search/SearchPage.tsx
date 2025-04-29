@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 import { default as React } from 'react';
-import { makeStyles, Theme, Grid, Paper } from '@material-ui/core';
+import { makeStyles } from '@mui/styles';
+import Grid from '@mui/material/Grid';
+import Paper from '@mui/material/Paper';
 
 import { CatalogSearchResultListItem } from '@backstage/plugin-catalog';
 import {
@@ -39,6 +41,7 @@ import {
   Page,
 } from '@backstage/core-components';
 import { useApi } from '@backstage/core-plugin-api';
+import { Theme } from '@mui/material/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
   bar: {
