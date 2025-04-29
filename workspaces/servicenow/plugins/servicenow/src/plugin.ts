@@ -31,7 +31,7 @@ export const ServicenowPage = servicenowPlugin.provide(
   createRoutableExtension({
     name: 'ServicenowPage',
     component: () =>
-      import('./components/ExampleComponent').then(m => m.ExampleComponent),
+      import('./components/Servicenow').then(m => m.ServicenowContent),
     mountPoint: rootRouteRef,
   }),
 );

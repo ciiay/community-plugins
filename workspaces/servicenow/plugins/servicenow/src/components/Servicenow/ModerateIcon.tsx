@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 The Backstage Authors
+ * Copyright 2024 The Backstage Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
-import '@backstage/cli/asset-types';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import '@backstage/canon/css/styles.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
+import { default as React } from 'react';
+import { CustomSvgIcon } from './CustomSvgIcon';
+
+export const ModerateIcon = (props: any) => (
+  <CustomSvgIcon
+    viewBox="0 0 16 16"
+    path={
+      <path d="M2.66675 11.3333V9.33332H13.3334V11.3333H2.66675ZM2.66675 6.66666V4.66666H13.3334V6.66666H2.66675Z" />
+    }
+    {...props}
+  />
+);
