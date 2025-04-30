@@ -20,6 +20,10 @@ import {
 
 import { rootRouteRef } from './routes';
 
+/**
+ * Servicenow Plugin
+ * @public
+ */
 export const servicenowPlugin = createPlugin({
   id: 'servicenow',
   routes: {
@@ -27,6 +31,10 @@ export const servicenowPlugin = createPlugin({
   },
 });
 
+/**
+ * Servicenow Page
+ * @public
+ */
 export const ServicenowPage = servicenowPlugin.provide(
   createRoutableExtension({
     name: 'ServicenowPage',
