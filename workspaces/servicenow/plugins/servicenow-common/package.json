@@ -12,8 +12,19 @@
     "module": "dist/index.esm.js",
     "types": "dist/index.d.ts"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/backstage/community-plugins",
+    "directory": "workspaces/servicenow/plugins/servicenow-common"
+  },
   "backstage": {
-    "role": "common-library"
+    "role": "common-library",
+    "pluginId": "servicenow",
+    "pluginPackages": [
+      "@backstage-community/plugin-servicenow",
+      "@backstage-community/plugin-servicenow-backend",
+      "@backstage-community/plugin-servicenow-common"
+    ]
   },
   "sideEffects": false,
   "scripts": {
