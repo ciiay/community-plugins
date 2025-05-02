@@ -20,74 +20,26 @@ import TableBody from '@mui/material/TableBody';
 import { IncidentsData } from '../../types';
 import { IncidentsListColumns } from './IncidentsListColumns';
 import { IncidentsTableRow } from './IncidentsTableRow';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 
-export const IncidentsTableBody = ({
-  // loading,
-  rows,
-}: // emptyRows,
-// error,
-{
-  // error: { [key: string]: string };
-  // loading: boolean;
-  // emptyRows: number;
-  rows: IncidentsData[];
-}) => {
-  // if (loading) {
-  //   return (
-  //     <tbody>
-  //       <tr>
-  //         <td colSpan={IncidentsListColumns?.length}>
-  //           <Box
-  //             data-testid="incidents-loading"
-  //             sx={{
-  //               p: 2,
-  //               display: 'flex',
-  //               justifyContent: 'center',
-  //             }}
-  //           >
-  //             <CircularProgress />
-  //           </Box>
-  //         </td>
-  //       </tr>
-  //     </tbody>
-  //   );
-  // }
-  // if (Object.keys(error || {}).length > 0) {
-  //   return (
-  //     <tbody>
-  //       <tr>
-  //         <td colSpan={IncidentsListColumns?.length}>
-  //           <div data-testid="incidents-error">
-  //             <Alert severity="error">{`${error.name}. ${error.message}`}</Alert>
-  //           </div>
-  //         </td>
-  //       </tr>
-  //     </tbody>
-  //   );
-  // }
+export const IncidentsTableBody = ({ rows }: { rows: IncidentsData[] }) => {
+  // TODO: Add loading and error states
 
   if (rows?.length > 0) {
     return (
       <TableBody data-testid="incidents">
-        {rows.map(row => {
-          return <IncidentsTableRow key={row.number} data={row} />;
-        })}
-        {/* {emptyRows > 0 && (
-          <TableRow
-            style={{
-              height: 55 * emptyRows,
-            }}
-          >
-            <TableCell />
-          </TableRow>
-        )} */}
+        {rows.map(row => (
+          <IncidentsTableRow key={row.number} data={row} />
+        ))}
       </TableBody>
     );
   }
+
   return (
-    <tbody>
-      <tr>
-        <td colSpan={IncidentsListColumns?.length}>
+    <TableBody>
+      <TableRow>
+        <TableCell colSpan={IncidentsListColumns.length}>
           <Box
             data-testid="no-incidents-found"
             sx={{
@@ -98,8 +50,8 @@ export const IncidentsTableBody = ({
           >
             No records found
           </Box>
-        </td>
-      </tr>
-    </tbody>
+        </TableCell>
+      </TableRow>
+    </TableBody>
   );
 };
