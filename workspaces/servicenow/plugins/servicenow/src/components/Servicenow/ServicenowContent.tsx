@@ -27,6 +27,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQueryState } from '../../hooks/useQueryState';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
+import { IncidentsFilter } from './IncidentsFilter';
 
 export const ServicenowContent = () => {
   const incidents = mockIncidents;
@@ -140,7 +141,7 @@ export const ServicenowContent = () => {
     >
       <CatalogFilterLayout>
         <CatalogFilterLayout.Filters>
-          <div />
+          <IncidentsFilter />
         </CatalogFilterLayout.Filters>
         <CatalogFilterLayout.Content>
           <Table

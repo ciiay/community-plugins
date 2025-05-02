@@ -37,7 +37,7 @@ interface StatusData {
 const iconStyleBase = { marginRight: 8 };
 const typographyStyleBase = { display: 'flex', alignItems: 'center' };
 
-const PRIORITY_MAP: Record<number, StatusData> = {
+export const PRIORITY_MAP: Record<number, StatusData> = {
   1: {
     Icon: LabelImportantIcon,
     color: '#C9190B',
@@ -50,7 +50,7 @@ const PRIORITY_MAP: Record<number, StatusData> = {
   5: { Icon: FormatListNumberedIcon, color: '#6A6E73', label: 'Planning' },
 };
 
-const INCIDENT_STATE_MAP: Record<number, StatusData> = {
+export const INCIDENT_STATE_MAP: Record<number, StatusData> = {
   1: { Icon: PendingOutlinedIcon, color: '#6A6E73', label: 'New' },
   2: { Icon: InProgressIcon, color: '#6A6E73', label: 'In Progress' },
   3: { Icon: PauseCircleOutlineIcon, color: '#6A6E73', label: 'On Hold' },
@@ -59,7 +59,7 @@ const INCIDENT_STATE_MAP: Record<number, StatusData> = {
   8: { Icon: ClosedIcon, color: '#6A6E73', label: 'Cancelled' },
 };
 
-const renderStatusLabel = (data?: StatusData) => {
+export const renderStatusLabel = (data?: StatusData) => {
   if (!data) return '';
 
   const { Icon, color, label, transform } = data;
