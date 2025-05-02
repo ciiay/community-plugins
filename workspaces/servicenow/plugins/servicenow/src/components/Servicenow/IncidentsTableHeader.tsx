@@ -56,7 +56,11 @@ export const IncidentsTableHeader = ({
             <TableSortLabel
               active={orderBy === column.field}
               direction={orderBy === column.field ? order : 'asc'}
-              onClick={createSortHandler(column.field)}
+              onClick={
+                column.sorting === false
+                  ? undefined
+                  : createSortHandler(column.field)
+              }
               disabled={column.sorting === false}
             >
               {column.title}
