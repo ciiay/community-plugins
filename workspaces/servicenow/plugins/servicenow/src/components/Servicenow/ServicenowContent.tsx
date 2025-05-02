@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
+import { default as React, useState, useEffect, useCallback } from 'react';
 import { Table } from '@backstage/core-components';
 import { CatalogFilterLayout } from '@backstage/plugin-catalog-react';
 import { mockIncidents } from '../../mocks/mockData';
@@ -23,22 +23,96 @@ import TablePagination from '@mui/material/TablePagination';
 import { SortingOrderEnum } from '../../types';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
 import { IncidentsTableBody } from './IncidentsTableBody';
+import { useSearchParams } from 'react-router-dom';
+import { useQueryState } from '../../hooks/useQueryState';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 
 export const ServicenowContent = () => {
   const incidents = mockIncidents;
-  const [order, setOrder] = React.useState<SortingOrderEnum>(
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [input, setInput] = useState(() => searchParams.get('search') ?? '');
+  const debouncedSearch = useDebouncedValue(input, 300);
+
+  const [order, setOrder] = useQueryState<SortingOrderEnum>(
+    'order',
     SortingOrderEnum.Asc,
   );
-  const [orderBy, setOrderBy] = React.useState<string>('incident-number');
-  const [pageNumber, setPageNumber] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  // const [debouncedSearch, setDebouncedSearch] = React.useState('');
-
-  // todo: implement data fetching with pagination, sorting
-  const paginatedRows = incidents.slice(
-    pageNumber * rowsPerPage,
-    pageNumber * rowsPerPage + rowsPerPage,
+  const [orderBy, setOrderBy] = useState<string>(
+    () => searchParams.get('orderBy') ?? 'incidentNumber',
   );
+
+  const [rowsPerPage, setRowsPerPage] = useQueryState<number>('limit', 5);
+  const [offset, setOffset] = useQueryState<number>('offset', 0);
+
+  const pageNumber = Math.floor(offset / rowsPerPage);
+
+  useEffect(() => {
+    setSearchParams(
+      prev => {
+        const params = new URLSearchParams(prev);
+        if (debouncedSearch) {
+          params.set('search', debouncedSearch);
+        } else {
+          params.delete('search');
+        }
+        params.set('limit', String(rowsPerPage));
+        params.set('offset', String(offset));
+        params.set('order', order);
+        params.set('orderBy', orderBy);
+        return params;
+      },
+      { replace: true },
+    );
+  }, [debouncedSearch, rowsPerPage, offset, order, orderBy, setSearchParams]);
+
+  const queryParams = buildIncidentQueryParams({
+    entityId: 'my-service-id',
+    limit: rowsPerPage,
+    offset,
+    order,
+    orderBy,
+    search: debouncedSearch,
+  });
+
+  // eslint-disable-next-line no-console
+  console.log('Backend-ready query:', queryParams.toString());
+
+  // Placeholder for future backend fetch
+  // useEffect(() => {
+  //   fetch(`https://<instance>.service-now.com/api/now/table/incident?${queryParams}`)
+  //     .then(res => res.json())
+  //     .then(json => setData(json.result))
+  //     .catch(err => console.error(err));
+  // }, [offset, rowsPerPage, debouncedSearch, orderBy]);
+
+  const paginatedIncidents = incidents.slice(offset, offset + rowsPerPage);
+
+  const updateQueryParams = useCallback(
+    (key: string, value: string | number) => {
+      setSearchParams(
+        prev => {
+          const params = new URLSearchParams(prev);
+          params.set(key, value.toString());
+          return params;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const newLimit = parseInt(event.target.value, 10);
+    setRowsPerPage(newLimit);
+    setOffset(0);
+  };
+
+  const handlePageChange = (_event: unknown, page: number) => {
+    setOffset(page * rowsPerPage);
+  };
 
   const handleRequestSort = (
     _event: React.MouseEvent<unknown>,
@@ -50,11 +124,10 @@ export const ServicenowContent = () => {
   };
 
   const handleSearch = (str: string) => {
-    // setDebouncedSearch(str);
-    // eslint-disable-next-line no-console
-    console.log(str);
-    setPageNumber(0);
+    setInput(str);
+    updateQueryParams('offset', 0);
   };
+
   return (
     <Box
       sx={{
@@ -71,7 +144,7 @@ export const ServicenowContent = () => {
         </CatalogFilterLayout.Filters>
         <CatalogFilterLayout.Content>
           <Table
-            data={incidents ?? []}
+            data={paginatedIncidents}
             columns={IncidentsListColumns}
             onSearchChange={handleSearch}
             title={
@@ -92,33 +165,19 @@ export const ServicenowContent = () => {
                   onRequestSort={handleRequestSort}
                 />
               ),
-              Body: () => (
-                <IncidentsTableBody
-                  rows={paginatedRows ?? []}
-                  // error={err}
-                  // loading={loading}
-                  // emptyRows={emptyRows}
-                />
-              ),
+              Body: () => <IncidentsTableBody rows={paginatedIncidents} />,
               Pagination: () => (
                 <TablePagination
-                  rowsPerPageOptions={[
-                    { value: 5, label: '5 rows' },
-                    { value: 10, label: '10 rows' },
-                    { value: 20, label: '20 rows' },
-                    { value: 50, label: '50 rows' },
-                    { value: 100, label: '100 rows' },
-                  ]}
+                  rowsPerPageOptions={[5, 10, 20, 50, 100].map(n => ({
+                    value: n,
+                    label: `${n} rows`,
+                  }))}
                   component="div"
                   count={incidents.length ?? 0}
                   rowsPerPage={rowsPerPage}
                   page={pageNumber}
-                  onPageChange={(_event, page: number) => {
-                    setPageNumber(page);
-                  }}
-                  onRowsPerPageChange={event => {
-                    setRowsPerPage(event.target.value as unknown as number);
-                  }}
+                  onPageChange={handlePageChange}
+                  onRowsPerPageChange={handleRowsPerPageChange}
                   labelRowsPerPage={null}
                 />
               ),
