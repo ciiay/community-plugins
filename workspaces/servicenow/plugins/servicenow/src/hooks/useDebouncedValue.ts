@@ -13,18 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export type IncidentsData = {
-  number: string;
-  shortDescription: string;
-  description: string;
-  sysCreatedOn: string;
-  priority: number;
-  incidentState: number;
-};
 
-export enum SortingOrderEnum {
-  Asc = 'asc',
-  Desc = 'desc',
+import { useState, useEffect } from 'react';
+
+export function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debounced;
 }
-
-export type Order = 'asc' | 'desc';
