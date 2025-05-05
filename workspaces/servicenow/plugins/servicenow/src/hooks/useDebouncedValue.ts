@@ -13,33 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createPlugin,
-  createRoutableExtension,
-} from '@backstage/core-plugin-api';
 
-import { rootRouteRef } from './routes';
+import { useState, useEffect } from 'react';
 
-/**
- * Servicenow Plugin
- * @public
- */
-export const servicenowPlugin = createPlugin({
-  id: 'servicenow',
-  routes: {
-    root: rootRouteRef,
-  },
-});
+export function useDebouncedValue<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
 
-/**
- * Servicenow Page
- * @public
- */
-export const ServicenowPage = servicenowPlugin.provide(
-  createRoutableExtension({
-    name: 'ServicenowPage',
-    component: () =>
-      import('./components/Servicenow').then(m => m.ServicenowContent),
-    mountPoint: rootRouteRef,
-  }),
-);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+
+  return debounced;
+}

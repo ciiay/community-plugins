@@ -13,33 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createPlugin,
-  createRoutableExtension,
-} from '@backstage/core-plugin-api';
 
-import { rootRouteRef } from './routes';
+import { default as React } from 'react';
+import SvgIcon from '@mui/material/SvgIcon';
 
-/**
- * Servicenow Plugin
- * @public
- */
-export const servicenowPlugin = createPlugin({
-  id: 'servicenow',
-  routes: {
-    root: rootRouteRef,
-  },
-});
-
-/**
- * Servicenow Page
- * @public
- */
-export const ServicenowPage = servicenowPlugin.provide(
-  createRoutableExtension({
-    name: 'ServicenowPage',
-    component: () =>
-      import('./components/Servicenow').then(m => m.ServicenowContent),
-    mountPoint: rootRouteRef,
-  }),
-);
+export const CustomSvgIcon = ({
+  path,
+  viewBox = '0 0 24 24',
+  ...props
+}: any) => {
+  return (
+    <SvgIcon viewBox={viewBox} {...props}>
+      {path}
+    </SvgIcon>
+  );
+};

@@ -13,4 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { ExampleFetchComponent } from './ExampleFetchComponent';
+export type IncidentsData = {
+  number: string;
+  shortDescription: string;
+  description: string;
+  sysCreatedOn: string;
+  priority: number;
+  incidentState: number;
+};
+
+export enum SortingOrderEnum {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
+export type Order = 'asc' | 'desc';

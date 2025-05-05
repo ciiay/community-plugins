@@ -13,33 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createPlugin,
-  createRoutableExtension,
-} from '@backstage/core-plugin-api';
 
-import { rootRouteRef } from './routes';
+export const convertDateFormat = (created: string) => {
+  if (!created) return '';
 
-/**
- * Servicenow Plugin
- * @public
- */
-export const servicenowPlugin = createPlugin({
-  id: 'servicenow',
-  routes: {
-    root: rootRouteRef,
-  },
-});
+  const date = new Date(created.replace(' ', 'T'));
 
-/**
- * Servicenow Page
- * @public
- */
-export const ServicenowPage = servicenowPlugin.provide(
-  createRoutableExtension({
-    name: 'ServicenowPage',
-    component: () =>
-      import('./components/Servicenow').then(m => m.ServicenowContent),
-    mountPoint: rootRouteRef,
-  }),
-);
+  if (isNaN(date.getTime())) return '';
+
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};

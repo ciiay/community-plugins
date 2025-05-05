@@ -13,33 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  createPlugin,
-  createRoutableExtension,
-} from '@backstage/core-plugin-api';
 
-import { rootRouteRef } from './routes';
+import { default as React } from 'react';
+import { CustomSvgIcon } from './CustomSvgIcon';
 
-/**
- * Servicenow Plugin
- * @public
- */
-export const servicenowPlugin = createPlugin({
-  id: 'servicenow',
-  routes: {
-    root: rootRouteRef,
-  },
-});
-
-/**
- * Servicenow Page
- * @public
- */
-export const ServicenowPage = servicenowPlugin.provide(
-  createRoutableExtension({
-    name: 'ServicenowPage',
-    component: () =>
-      import('./components/Servicenow').then(m => m.ServicenowContent),
-    mountPoint: rootRouteRef,
-  }),
+export const ClosedIcon = (props: any) => (
+  <CustomSvgIcon
+    viewBox="0 0 16 16"
+    path={
+      <path d="M2.333 8.667c-.278 0-.486-.236-.65-.4-.163-.163-.4-.372-.4-.65s.236-.486.4-.65c.163-.163.372-.4.65-.4h4c.278 0 .486.236.65.4.163.163.4.372.4.65s-.236.486-.4.65c-.163.163-.372.4-.65.4h-4Zm7.333 0c-.278 0-.486-.236-.65-.4-.163-.163-.4-.372-.4-.65s.236-.486.4-.65c.163-.163.372-.4.65-.4h4c.278 0 .486.236.65.4.163.163.4.372.4.65s-.236.486-.4.65c-.163.163-.372.4-.65.4h-4Z" />
+    }
+    {...props}
+  />
 );
