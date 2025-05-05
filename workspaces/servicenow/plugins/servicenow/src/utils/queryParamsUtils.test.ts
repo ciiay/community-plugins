@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { IncidentTableFieldEnum } from '../types';
 import { buildIncidentQueryParams } from './queryParamsUtils';
 
 describe('buildIncidentQueryParams', () => {
@@ -21,7 +22,7 @@ describe('buildIncidentQueryParams', () => {
     entityId: 'service-id-123',
     limit: 10,
     offset: 20,
-    orderBy: 'priority',
+    orderBy: IncidentTableFieldEnum.Priority,
   };
 
   it('builds params for ascending order', () => {
