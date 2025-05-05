@@ -17,13 +17,13 @@
 import { default as React, useCallback } from 'react';
 import { SelectItem } from '@backstage/core-components';
 import Autocomplete from '@mui/material/Autocomplete';
+import Box from '@mui/material/Box';
 import Checkbox from '@mui/material/Checkbox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
-import Box from '@mui/material/Box';
 import { useQueryArrayFilter } from '../../hooks/useQueryArrayFilter';
 import {
   INCIDENT_STATE_MAP,
