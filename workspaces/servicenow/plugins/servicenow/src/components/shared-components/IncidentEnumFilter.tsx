@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import { default as React } from 'react';
-import { useCallback } from 'react';
+import { default as React, useCallback } from 'react';
 import { SelectItem } from '@backstage/core-components';
 import Autocomplete from '@mui/material/Autocomplete';
 import Checkbox from '@mui/material/Checkbox';
@@ -112,14 +111,7 @@ export const IncidentEnumFilter = ({
             data-testid={`select-${label.toLowerCase().replace(/\s/g, '-')}`}
           />
         }
-        // renderInput={params => <TextField {...params} variant="outlined" />}
-        renderInput={params => {
-          return filter.current.length > 0 ? (
-            <TextField {...params} variant="outlined" />
-          ) : (
-            <TextField {...params} placeholder="All" variant="outlined" />
-          );
-        }}
+        renderInput={params => <TextField {...params} variant="outlined" />}
       />
     </Box>
   );
