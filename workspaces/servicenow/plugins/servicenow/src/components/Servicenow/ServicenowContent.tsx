@@ -140,7 +140,7 @@ export const ServicenowContent = () => {
     >
       <CatalogFilterLayout>
         <CatalogFilterLayout.Filters>
-          'filter placeholder'
+          <div />
         </CatalogFilterLayout.Filters>
         <CatalogFilterLayout.Content>
           <Table
