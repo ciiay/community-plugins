@@ -22,7 +22,7 @@ describe('incidentUtils', () => {
       render(getPriorityValue(1));
       expect(screen.getByText('Critical')).toBeInTheDocument();
 
-      const icon = screen.getByTestId('LabelImportantIcon'); // default test ID from MUI icon
+      const icon = screen.getByTestId('LabelImportantIcon');
       expect(icon).toHaveStyle('color: #C9190B');
       expect(icon).toHaveStyle('transform: rotate(-90deg)');
     });

@@ -17,8 +17,9 @@
 import { default as React } from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { IncidentEnumFilter } from './IncidentEnumFilter';
 import { SelectItem } from '@backstage/core-components';
+
+import { IncidentEnumFilter } from './IncidentEnumFilter';
 
 const mockSet = jest.fn();
 const mockFilter = {

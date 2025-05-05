@@ -17,7 +17,7 @@ import { default as React } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
 import { IncidentsListColumns } from './IncidentsListColumns';
-import { Order } from '../../types'; // Adjust the import path if needed
+import { Order } from '../../types';
 
 describe('IncidentsTableHeader', () => {
   const mockOnRequestSort = jest.fn();

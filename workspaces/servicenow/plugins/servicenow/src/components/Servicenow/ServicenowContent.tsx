@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React, useState, useEffect, useCallback } from 'react';
-import { Table } from '@backstage/core-components';
+import { default as React, useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+
 import { CatalogFilterLayout } from '@backstage/plugin-catalog-react';
-import { mockIncidents } from '../../mocks/mockData';
-import { IncidentsListColumns } from './IncidentsListColumns';
+import { Table } from '@backstage/core-components';
 import Box from '@mui/material/Box';
 import TablePagination from '@mui/material/TablePagination';
-import { SortingOrderEnum } from '../../types';
-import { IncidentsTableHeader } from './IncidentsTableHeader';
-import { IncidentsTableBody } from './IncidentsTableBody';
-import { useSearchParams } from 'react-router-dom';
-import { useQueryState } from '../../hooks/useQueryState';
-import { useDebouncedValue } from '../../hooks/useDebouncedValue';
-import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
+
 import { IncidentsFilter } from './IncidentsFilter';
+import { IncidentsListColumns } from './IncidentsListColumns';
+import { IncidentsTableBody } from './IncidentsTableBody';
+import { IncidentsTableHeader } from './IncidentsTableHeader';
+import { SortingOrderEnum } from '../../types';
+import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
+import { mockIncidents } from '../../mocks/mockData';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
+import { useQueryState } from '../../hooks/useQueryState';
 
 export const ServicenowContent = () => {
   const incidents = mockIncidents;
@@ -174,12 +176,17 @@ export const ServicenowContent = () => {
                     label: `${n} rows`,
                   }))}
                   component="div"
+                  sx={{
+                    mr: 1,
+                  }}
                   count={incidents.length ?? 0}
                   rowsPerPage={rowsPerPage}
                   page={pageNumber}
                   onPageChange={handlePageChange}
                   onRowsPerPageChange={handleRowsPerPageChange}
                   labelRowsPerPage={null}
+                  showFirstButton
+                  showLastButton
                 />
               ),
             }}
