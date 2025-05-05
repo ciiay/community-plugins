@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 import { default as React } from 'react';
-import { IncidentsData } from '../../types';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import IconButton from '@mui/material/IconButton';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
 import { makeStyles } from '@mui/styles';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+
 import { convertDateFormat } from '../../utils/stringUtils';
+import { IncidentsData } from '../../types';
 import {
   getIncidentStateValue,
   getPriorityValue,
 } from '../../utils/incidentUtils';
-import IconButton from '@mui/material/IconButton';
 
 const useStyles = makeStyles(() => ({
   tableCellStyle: {
