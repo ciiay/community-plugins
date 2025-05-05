@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 import { default as React } from 'react';
+
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
+
 import { IncidentsListColumns } from './IncidentsListColumns';
 import { Order } from '../../types';
-import TableSortLabel from '@mui/material/TableSortLabel';
 
 type IncidentsTableHeaderProps = {
   order: Order;

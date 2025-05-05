@@ -15,9 +15,10 @@
  */
 import { default as React } from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import { IncidentsTableRow } from './IncidentsTableRow';
 import { IncidentsData } from '../../types';
-import userEvent from '@testing-library/user-event';
 
 jest.mock('@mui/styles', () => ({
   makeStyles: () => () => ({}),

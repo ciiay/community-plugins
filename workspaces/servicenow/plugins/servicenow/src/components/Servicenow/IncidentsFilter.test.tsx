@@ -18,7 +18,6 @@ import { default as React } from 'react';
 import { render, screen } from '@testing-library/react';
 import { IncidentsFilter } from './IncidentsFilter';
 
-// Mock the child component to isolate the test
 jest.mock('../shared-components/IncidentEnumFilter', () => ({
   IncidentEnumFilter: ({ label }: { label: string }) => (
     <div data-testid="incident-enum-filter">{label}</div>

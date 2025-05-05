@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 import { default as React } from 'react';
+
 import Box from '@mui/material/Box';
 import TableBody from '@mui/material/TableBody';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 
 import { IncidentsData } from '../../types';
 import { IncidentsListColumns } from './IncidentsListColumns';
 import { IncidentsTableRow } from './IncidentsTableRow';
-import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
 
 export const IncidentsTableBody = ({ rows }: { rows: IncidentsData[] }) => {
   // TODO: Add loading and error states

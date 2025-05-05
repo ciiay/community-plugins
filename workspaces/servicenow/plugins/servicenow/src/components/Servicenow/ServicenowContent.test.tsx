@@ -15,10 +15,11 @@
  */
 import { default as React } from 'react';
 import { screen } from '@testing-library/react';
-import { ServicenowContent } from './ServicenowContent';
 import { renderInTestApp } from '@backstage/test-utils';
-import { mockIncidents } from '../../mocks/mockData';
 import userEvent from '@testing-library/user-event';
+
+import { ServicenowContent } from './ServicenowContent';
+import { mockIncidents } from '../../mocks/mockData';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
