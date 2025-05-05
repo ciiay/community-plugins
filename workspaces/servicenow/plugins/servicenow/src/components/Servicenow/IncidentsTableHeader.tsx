@@ -21,12 +21,15 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 
 import { IncidentsListColumns } from './IncidentsListColumns';
-import { Order } from '../../types';
+import { IncidentTableFieldEnum, Order } from '../../types';
 
 type IncidentsTableHeaderProps = {
   order: Order;
-  orderBy: string | undefined;
-  onRequestSort: (event: React.MouseEvent<unknown>, property: string) => void;
+  orderBy: IncidentTableFieldEnum | undefined;
+  onRequestSort: (
+    event: React.MouseEvent<unknown>,
+    property: IncidentTableFieldEnum,
+  ) => void;
 };
 
 export const IncidentsTableHeader = ({
@@ -35,7 +38,8 @@ export const IncidentsTableHeader = ({
   onRequestSort,
 }: IncidentsTableHeaderProps) => {
   const createSortHandler =
-    (property: any) => (event: React.MouseEvent<unknown>) => {
+    (property: IncidentTableFieldEnum) =>
+    (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 
@@ -61,7 +65,7 @@ export const IncidentsTableHeader = ({
               onClick={
                 column.sorting === false
                   ? undefined
-                  : createSortHandler(column.field)
+                  : createSortHandler(column.field as IncidentTableFieldEnum)
               }
               disabled={column.sorting === false}
             >

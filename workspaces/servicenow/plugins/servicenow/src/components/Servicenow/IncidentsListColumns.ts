@@ -15,43 +15,42 @@
  */
 import { TableColumn } from '@backstage/core-components';
 
-import { IncidentsData } from '../../types';
+import { IncidentsData, IncidentTableFieldEnum } from '../../types';
 
 export const IncidentsListColumns: TableColumn<IncidentsData>[] = [
   {
     id: 'incidentNumber',
     title: 'Request ID',
-    field: 'number',
+    field: IncidentTableFieldEnum.Number,
     type: 'string',
   },
   {
     id: 'description',
     title: 'Description',
-    field: 'shortDescription',
+    field: IncidentTableFieldEnum.ShortDescription,
     type: 'string',
   },
   {
     id: 'created',
     title: 'Created',
-    field: 'sysCreatedOn',
+    field: IncidentTableFieldEnum.Created,
     type: 'string',
   },
   {
     id: 'priority',
     title: 'Priority',
-    field: 'priority',
+    field: IncidentTableFieldEnum.Priority,
     type: 'numeric',
   },
   {
     id: 'state',
     title: 'State',
-    field: 'incidentState',
+    field: IncidentTableFieldEnum.IncidentState,
     type: 'datetime',
   },
   {
     id: 'actions',
     title: 'Actions',
-    field: 'actions',
     sorting: false,
     type: 'string',
   },

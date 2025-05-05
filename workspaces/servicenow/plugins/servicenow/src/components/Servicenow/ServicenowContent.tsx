@@ -25,7 +25,7 @@ import { IncidentsFilter } from './IncidentsFilter';
 import { IncidentsListColumns } from './IncidentsListColumns';
 import { IncidentsTableBody } from './IncidentsTableBody';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
-import { SortingOrderEnum } from '../../types';
+import { IncidentTableFieldEnum, SortingOrderEnum } from '../../types';
 import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 import { mockIncidents } from '../../mocks/mockData';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
@@ -41,8 +41,10 @@ export const ServicenowContent = () => {
     'order',
     SortingOrderEnum.Asc,
   );
-  const [orderBy, setOrderBy] = useState<string>(
-    () => searchParams.get('orderBy') ?? 'incidentNumber',
+  const [orderBy, setOrderBy] = useState<IncidentTableFieldEnum>(
+    () =>
+      (searchParams.get('orderBy') as IncidentTableFieldEnum) ??
+      IncidentTableFieldEnum.Number,
   );
 
   const [rowsPerPage, setRowsPerPage] = useQueryState<number>('limit', 5);
@@ -119,7 +121,7 @@ export const ServicenowContent = () => {
 
   const handleRequestSort = (
     _event: React.MouseEvent<unknown>,
-    property: string,
+    property: IncidentTableFieldEnum,
   ) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? SortingOrderEnum.Desc : SortingOrderEnum.Asc);
