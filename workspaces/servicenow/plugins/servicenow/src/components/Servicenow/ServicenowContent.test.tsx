@@ -58,8 +58,11 @@ describe('ServicenowContent', () => {
 
   it('displays pagination dropdown', async () => {
     await renderInTestApp(<ServicenowContent />);
-    const dropdown = screen.getByRole('combobox');
-    expect(dropdown).toBeInTheDocument();
+    const dropdowns = screen.getAllByRole('combobox');
+    const paginationDropdown = dropdowns.find(el =>
+      el.textContent?.includes('5 rows'),
+    );
+    expect(paginationDropdown).toBeInTheDocument();
   });
 
   it.skip('shows empty content placeholder when no incidents are available', async () => {
