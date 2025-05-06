@@ -17,12 +17,15 @@ import { default as React } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
 import { IncidentsListColumns } from './IncidentsListColumns';
-import { Order } from '../../types'; // Adjust the import path if needed
+import { IncidentTableFieldEnum, Order } from '../../types';
 
 describe('IncidentsTableHeader', () => {
   const mockOnRequestSort = jest.fn();
 
-  const renderComponent = (order: Order, orderBy: string | undefined) => {
+  const renderComponent = (
+    order: Order,
+    orderBy: IncidentTableFieldEnum | undefined,
+  ) => {
     return render(
       <table>
         <thead>
@@ -48,13 +51,13 @@ describe('IncidentsTableHeader', () => {
   });
 
   it('activates sort only for the selected column', () => {
-    renderComponent('desc', 'number');
+    renderComponent('desc', IncidentTableFieldEnum.Number);
     const activeSortLabel = screen.getByText('Request ID').closest('th');
     expect(activeSortLabel).toHaveAttribute('aria-sort', 'descending');
   });
 
   it('calls onRequestSort when a sortable column is clicked', () => {
-    renderComponent('asc', 'number');
+    renderComponent('asc', IncidentTableFieldEnum.Number);
     const header = screen.getByText('Request ID');
     fireEvent.click(header);
     expect(mockOnRequestSort).toHaveBeenCalledWith(
@@ -64,7 +67,7 @@ describe('IncidentsTableHeader', () => {
   });
 
   it('does not call onRequestSort for non-sortable columns', () => {
-    renderComponent('asc', 'number');
+    renderComponent('asc', IncidentTableFieldEnum.Number);
     const header = screen.getByText('Actions');
     fireEvent.click(header);
     expect(mockOnRequestSort).not.toHaveBeenCalledWith(

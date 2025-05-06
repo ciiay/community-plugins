@@ -15,10 +15,11 @@
  */
 import { default as React } from 'react';
 import { screen } from '@testing-library/react';
-import { ServicenowContent } from './ServicenowContent';
 import { renderInTestApp } from '@backstage/test-utils';
-import { mockIncidents } from '../../mocks/mockData';
 import userEvent from '@testing-library/user-event';
+
+import { ServicenowContent } from './ServicenowContent';
+import { mockIncidents } from '../../mocks/mockData';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -58,8 +59,11 @@ describe('ServicenowContent', () => {
 
   it('displays pagination dropdown', async () => {
     await renderInTestApp(<ServicenowContent />);
-    const dropdown = screen.getByRole('combobox');
-    expect(dropdown).toBeInTheDocument();
+    const dropdowns = screen.getAllByRole('combobox');
+    const paginationDropdown = dropdowns.find(el =>
+      el.textContent?.includes('5 rows'),
+    );
+    expect(paginationDropdown).toBeInTheDocument();
   });
 
   it.skip('shows empty content placeholder when no incidents are available', async () => {

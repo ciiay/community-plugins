@@ -22,6 +22,14 @@ export type IncidentsData = {
   incidentState: number;
 };
 
+export enum IncidentTableFieldEnum {
+  Number = 'number',
+  ShortDescription = 'short_description',
+  Created = 'sys_created_on',
+  Priority = 'priority',
+  IncidentState = 'incident_state',
+}
+
 export enum SortingOrderEnum {
   Asc = 'asc',
   Desc = 'desc',
