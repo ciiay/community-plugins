@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { default as React } from 'react';
 import SvgIcon from '@mui/material/SvgIcon';
 
 export const CustomSvgIcon = ({

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { default as React } from 'react';
 import { CustomSvgIcon } from './CustomSvgIcon';
 
 export const ClosedIcon = (props: any) => (

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { default as React, useCallback } from 'react';
+import { useCallback } from 'react';
 import { SelectItem } from '@backstage/core-components';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';

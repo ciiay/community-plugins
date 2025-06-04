@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
 
+import { MouseEvent } from 'react';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
@@ -27,7 +27,7 @@ type IncidentsTableHeaderProps = {
   order: Order;
   orderBy: IncidentTableFieldEnum | undefined;
   onRequestSort: (
-    event: React.MouseEvent<unknown>,
+    event: MouseEvent<unknown>,
     property: IncidentTableFieldEnum,
   ) => void;
 };
@@ -38,8 +38,7 @@ export const IncidentsTableHeader = ({
   onRequestSort,
 }: IncidentsTableHeaderProps) => {
   const createSortHandler =
-    (property: IncidentTableFieldEnum) =>
-    (event: React.MouseEvent<unknown>) => {
+    (property: IncidentTableFieldEnum) => (event: MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 

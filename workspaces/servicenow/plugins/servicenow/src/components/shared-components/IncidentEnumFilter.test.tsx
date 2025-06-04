@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { default as React } from 'react';
+import { createElement } from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SelectItem } from '@backstage/core-components';
@@ -42,7 +42,7 @@ jest.mock('../../utils/incidentUtils', () => {
       2: { label: 'In Progress' },
     },
     renderStatusLabel: (data: { label: string }) =>
-      React.createElement('span', {}, data.label),
+      createElement('span', {}, data.label),
   };
 });
 

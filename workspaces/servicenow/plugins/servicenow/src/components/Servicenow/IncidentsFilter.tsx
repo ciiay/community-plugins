@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { default as React } from 'react';
 import Box from '@mui/material/Box';
 import { IncidentEnumFilter } from '../shared-components/IncidentEnumFilter';
 import { INCIDENT_STATE_MAP, PRIORITY_MAP } from '../../utils/incidentUtils';

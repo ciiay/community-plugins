@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
+
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
 import { IncidentsListColumns } from './IncidentsListColumns';
