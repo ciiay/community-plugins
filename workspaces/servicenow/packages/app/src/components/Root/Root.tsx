@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
+
 import { PropsWithChildren } from 'react';
 import { makeStyles } from '@mui/styles';
 import HomeIcon from '@mui/icons-material/Home';

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
+import { ElementType } from 'react';
 import LabelImportantIcon from '@mui/icons-material/LabelImportant';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
@@ -28,7 +28,7 @@ import { ClosedIcon } from '../components/Servicenow/ClosedIcon';
 import Typography from '@mui/material/Typography';
 
 interface StatusData {
-  Icon: React.ElementType;
+  Icon: ElementType;
   color: string;
   label: string;
   transform?: string;

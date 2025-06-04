@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
+
 import '@backstage/cli/asset-types';
 import ReactDOM from 'react-dom/client';
 import App from './App';
