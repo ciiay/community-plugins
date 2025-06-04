@@ -13,7 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React, useCallback, useEffect, useState } from 'react';
+import {
+  MouseEvent,
+  ChangeEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { CatalogFilterLayout } from '@backstage/plugin-catalog-react';
@@ -107,9 +113,7 @@ export const ServicenowContent = () => {
     [setSearchParams],
   );
 
-  const handleRowsPerPageChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newLimit = parseInt(event.target.value, 10);
     setRowsPerPage(newLimit);
     setOffset(0);
@@ -120,7 +124,7 @@ export const ServicenowContent = () => {
   };
 
   const handleRequestSort = (
-    _event: React.MouseEvent<unknown>,
+    _event: MouseEvent<unknown>,
     property: IncidentTableFieldEnum,
   ) => {
     const isAsc = orderBy === property && order === 'asc';
