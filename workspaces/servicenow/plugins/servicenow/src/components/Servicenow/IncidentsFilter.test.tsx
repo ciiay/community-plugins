@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { default as React } from 'react';
 import { render, screen } from '@testing-library/react';
 import { IncidentsFilter } from './IncidentsFilter';
 

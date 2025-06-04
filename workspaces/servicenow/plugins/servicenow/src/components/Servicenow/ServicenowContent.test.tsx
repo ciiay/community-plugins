@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { default as React } from 'react';
+
 import { screen } from '@testing-library/react';
 import { renderInTestApp } from '@backstage/test-utils';
 import userEvent from '@testing-library/user-event';
