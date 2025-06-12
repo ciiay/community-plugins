@@ -13,22 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { HttpAuthService } from '@backstage/backend-plugin-api';
+import { HttpAuthService, LoggerService } from '@backstage/backend-plugin-api';
 import { InputError } from '@backstage/errors';
 import { z } from 'zod';
 import express from 'express';
 import Router from 'express-promise-router';
 import { TodoListService } from './services/TodoListService/types';
+import { ServiceNowSingleConfig } from './config/config';
 
-export async function createRouter({
-  httpAuth,
-  todoListService,
-}: {
+export interface RouterOptions {
+  logger: LoggerService;
   httpAuth: HttpAuthService;
   todoListService: TodoListService;
-}): Promise<express.Router> {
+  servicenowConfig: ServiceNowSingleConfig;
+}
+
+export async function createRouter(
+  options: RouterOptions,
+): Promise<express.Router> {
+  const { logger, httpAuth, todoListService, servicenowConfig } = options;
   const router = Router();
   router.use(express.json());
+
+  logger.info(
+    `Creating ServiceNow router with instance URL: ${servicenowConfig.instanceUrl}`,
+  );
 
   // TEMPLATE NOTE:
   // Zod is a powerful library for data validation and recommended in particular

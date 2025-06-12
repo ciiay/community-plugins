@@ -20,6 +20,7 @@ import {
 import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node';
 import { createTodoListService } from './services/TodoListService';
+import { readServiceNowConfig } from './config/config';
 
 /**
  * servicenowPlugin backend plugin
@@ -32,11 +33,21 @@ export const servicenowPlugin = createBackendPlugin({
     env.registerInit({
       deps: {
         logger: coreServices.logger,
+        config: coreServices.rootConfig,
         httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
         catalog: catalogServiceRef,
       },
-      async init({ logger, httpAuth, httpRouter, catalog }) {
+      async init({ logger, config, httpAuth, httpRouter, catalog }) {
+        const servicenowConfig = readServiceNowConfig(config);
+
+        if (!servicenowConfig) {
+          logger.error(
+            'ServiceNow plugin configuration is missing. The plugin will not be initialized.',
+          );
+          return;
+        }
+
         const todoListService = await createTodoListService({
           logger,
           catalog,
@@ -44,8 +55,10 @@ export const servicenowPlugin = createBackendPlugin({
 
         httpRouter.use(
           await createRouter({
+            logger,
             httpAuth,
             todoListService,
+            servicenowConfig,
           }),
         );
       },
