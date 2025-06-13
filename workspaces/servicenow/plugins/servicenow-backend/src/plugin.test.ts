@@ -13,112 +13,169 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  mockCredentials,
-  startTestBackend,
-} from '@backstage/backend-test-utils';
-import { servicenowPlugin } from './plugin';
-import request from 'supertest';
-import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 import { ConfigReader } from '@backstage/config';
 import {
   coreServices,
   createServiceFactory,
 } from '@backstage/backend-plugin-api';
+import { startTestBackend, mockServices } from '@backstage/backend-test-utils';
+import request from 'supertest';
 
-describe('plugin', () => {
-  const mockConfig = new ConfigReader({
-    servicenow: {
-      instanceUrl: 'https://mock.service-now.com',
-      oauth: {
-        grantType: 'client_credentials',
-        clientId: 'mockClientId',
-        clientSecret: 'mockClientSecret',
-      },
+const mockFetchIncidents = jest.fn();
+
+const validServicenowConfig = new ConfigReader({
+  servicenow: {
+    instanceUrl: 'https://mock.service-now.com',
+    oauth: {
+      grantType: 'client_credentials',
+      clientId: 'test-client-id',
+      clientSecret: 'test-client-secret',
     },
-  });
+  },
+});
 
-  it('should create and read TODO items', async () => {
-    const { server } = await startTestBackend({
-      features: [
-        servicenowPlugin,
-        catalogServiceMock.factory({ entities: [] }),
-        createServiceFactory({
-          service: coreServices.rootConfig,
-          deps: {},
-          factory: () => mockConfig,
-        }),
-      ],
-    });
+describe('servicenowPlugin', () => {
+  let MockedDefaultServiceNowClientConstructor: jest.Mock;
 
-    await request(server).get('/api/servicenow/todos').expect(200, {
-      items: [],
-    });
+  beforeEach(() => {
+    jest.resetModules();
 
-    const createRes = await request(server)
-      .post('/api/servicenow/todos')
-      .send({ title: 'My Todo' });
+    mockFetchIncidents.mockReset();
 
-    expect(createRes.status).toBe(201);
-    expect(createRes.body).toEqual({
-      id: expect.any(String),
-      title: 'My Todo',
-      createdBy: mockCredentials.user().principal.userEntityRef,
-      createdAt: expect.any(String),
-    });
-
-    const createdTodoItem = createRes.body;
-
-    await request(server)
-      .get('/api/servicenow/todos')
-      .expect(200, {
-        items: [createdTodoItem],
+    MockedDefaultServiceNowClientConstructor = jest
+      .fn()
+      .mockImplementation(() => {
+        return {
+          fetchIncidents: mockFetchIncidents,
+        };
       });
 
-    await request(server)
-      .get(`/api/servicenow/todos/${createdTodoItem.id}`)
-      .expect(200, createdTodoItem);
+    jest.doMock('./service-now-rest/client', () => {
+      return {
+        DefaultServiceNowClient: MockedDefaultServiceNowClientConstructor,
+      };
+    });
   });
 
-  it('should create TODO item with catalog information', async () => {
+  it('should start and expose health check endpoint when configured', async () => {
+    const { servicenowPlugin } = require('./plugin');
+
     const { server } = await startTestBackend({
       features: [
         servicenowPlugin,
-        catalogServiceMock.factory({
-          entities: [
-            {
-              apiVersion: 'backstage.io/v1alpha1',
-              kind: 'Component',
-              metadata: {
-                name: 'my-component',
-                namespace: 'default',
-                title: 'My Component',
-              },
-              spec: {
-                type: 'service',
-                owner: 'me',
-              },
-            },
-          ],
+        createServiceFactory({
+          service: coreServices.rootConfig,
+          deps: {},
+          factory: () => validServicenowConfig,
+        }),
+        mockServices.logger.factory(),
+      ],
+    });
+
+    const agent = request.agent(server);
+    const response = await agent.get('/api/servicenow/health');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ status: 'ok' });
+    await server.stop();
+  });
+
+  it('should respond to /incidents if configured', async () => {
+    const { servicenowPlugin } = require('./plugin');
+    const mockIncidentsData = [
+      { id: 'INC001', short_description: 'Test incident' },
+    ];
+    mockFetchIncidents.mockResolvedValueOnce(mockIncidentsData);
+
+    const { server } = await startTestBackend({
+      features: [
+        servicenowPlugin,
+        createServiceFactory({
+          service: coreServices.rootConfig,
+          deps: {},
+          factory: () => validServicenowConfig,
+        }),
+        mockServices.logger.factory(),
+      ],
+    });
+    const agent = request.agent(server);
+    const response = await agent.get('/api/servicenow/incidents?limit=1');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(mockIncidentsData);
+    expect(MockedDefaultServiceNowClientConstructor).toHaveBeenCalledTimes(1);
+    expect(mockFetchIncidents).toHaveBeenCalledTimes(1);
+    expect(mockFetchIncidents).toHaveBeenCalledWith({
+      limit: 1,
+      offset: undefined,
+      assignedTo: undefined,
+      state: undefined,
+      priority: undefined,
+      shortDescription: undefined,
+    });
+    await server.stop();
+  });
+
+  it('should not initialize main routes if servicenow config is missing', async () => {
+    const { servicenowPlugin } = require('./plugin');
+    const logger = mockServices.logger.mock();
+
+    const { server } = await startTestBackend({
+      features: [
+        servicenowPlugin,
+        createServiceFactory({
+          service: coreServices.logger,
+          deps: {},
+          factory: () => logger,
         }),
         createServiceFactory({
           service: coreServices.rootConfig,
           deps: {},
-          factory: () => mockConfig,
+          factory: () => new ConfigReader({}),
         }),
       ],
     });
 
-    const createRes = await request(server)
-      .post('/api/servicenow/todos')
-      .send({ title: 'My Todo', entityRef: 'component:default/my-component' });
+    expect(logger.error).toHaveBeenCalledWith(
+      'ServiceNow plugin configuration is missing. The plugin will not be initialized.',
+    );
 
-    expect(createRes.status).toBe(201);
-    expect(createRes.body).toEqual({
-      id: expect.any(String),
-      title: '[My Component] My Todo',
-      createdBy: mockCredentials.user().principal.userEntityRef,
-      createdAt: expect.any(String),
+    const agent = request.agent(server);
+    const incidentsResponse = await agent
+      .get('/api/servicenow/incidents')
+      .catch(e => e.response);
+    expect(incidentsResponse.status).toBe(404);
+
+    const healthResponse = await agent
+      .get('/api/servicenow/health')
+      .catch(e => e.response);
+    expect(healthResponse.status).toBe(404);
+    await server.stop();
+  });
+
+  it('should handle errors from serviceNowClient.fetchIncidents', async () => {
+    const { servicenowPlugin } = require('./plugin');
+    mockFetchIncidents.mockRejectedValueOnce(new Error('ServiceNow API Error'));
+
+    const { server } = await startTestBackend({
+      features: [
+        servicenowPlugin,
+        createServiceFactory({
+          service: coreServices.rootConfig,
+          deps: {},
+          factory: () => validServicenowConfig,
+        }),
+        mockServices.logger.factory(),
+      ],
     });
+
+    const agent = request.agent(server);
+    const response = await agent.get('/api/servicenow/incidents');
+
+    expect(response.status).toBe(500);
+    expect(response.body.error.message).toBe('ServiceNow API Error');
+    expect(MockedDefaultServiceNowClientConstructor).toHaveBeenCalledTimes(1);
+    expect(mockFetchIncidents).toHaveBeenCalledTimes(1);
+    await server.stop();
   });
 });
