@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
+export type ServiceNowOAuthConfig =
+  | {
+      grantType: 'client_credentials';
+      clientId: string;
+      clientSecret: string;
+      tokenUrl?: string;
+    }
+  | {
+      grantType: 'password';
+      clientId: string;
+      clientSecret: string;
+      username: string;
+      password: string;
+      tokenUrl?: string;
+    };
+
 export interface Config {
   servicenow?: {
     instanceUrl: string;
-    oauth?: {
-      clientId: string;
-      clientSecret: string;
-      // tokenUrl is optional as it's implied
-      tokenUrl?: string;
-    };
+    oauth?: ServiceNowOAuthConfig;
     userFilterField?: string;
   };
 }

@@ -21,11 +21,21 @@ import { InputError } from '@backstage/errors';
  * Defines the OAuth configuration for ServiceNow.
  * @public
  */
-export interface ServiceNowOAuthConfig {
-  clientId: string;
-  clientSecret: string;
-  tokenUrl?: string;
-}
+export type ServiceNowOAuthConfig =
+  | {
+      grantType: 'client_credentials';
+      clientId: string;
+      clientSecret: string;
+      tokenUrl?: string;
+    }
+  | {
+      grantType: 'password';
+      clientId: string;
+      clientSecret: string;
+      username: string;
+      password: string;
+      tokenUrl?: string;
+    };
 
 /**
  * Defines the configuration for a single ServiceNow instance.
@@ -62,21 +72,60 @@ export function readServiceNowConfig(
 
   let oauth: ServiceNowOAuthConfig | undefined = undefined;
   const oauthConfig = serviceNowConfig.getOptionalConfig('oauth');
+
   if (oauthConfig) {
+    const grantType = oauthConfig.getString('grantType');
+    if (grantType !== 'client_credentials' && grantType !== 'password') {
+      throw new Error(`Unsupported OAuth grantType: ${grantType}`);
+    }
     const clientId = oauthConfig.getString('clientId');
+    const clientSecret = oauthConfig.getString('clientSecret');
+    const tokenUrl = oauthConfig.getOptionalString('tokenUrl');
+
     if (!clientId) {
       throw new InputError(
         'Missing required config value at servicenow.oauth.clientId',
       );
     }
-    const clientSecret = oauthConfig.getString('clientSecret');
     if (!clientSecret) {
       throw new InputError(
         'Missing required config value at servicenow.oauth.clientSecret',
       );
     }
-    const tokenUrl = oauthConfig.getOptionalString('tokenUrl');
-    oauth = { clientId, clientSecret, tokenUrl };
+
+    if (grantType === 'client_credentials') {
+      oauth = {
+        grantType,
+        clientId,
+        clientSecret,
+        tokenUrl,
+      };
+    } else if (grantType === 'password') {
+      const username = oauthConfig.getString('username');
+      const password = oauthConfig.getString('password');
+      if (!username) {
+        throw new InputError(
+          "Missing required config value at servicenow.oauth.username for 'password' grant type",
+        );
+      }
+      if (!password) {
+        throw new InputError(
+          "Missing required config value at servicenow.oauth.password for 'password' grant type",
+        );
+      }
+      oauth = {
+        grantType,
+        clientId,
+        clientSecret,
+        username,
+        password,
+        tokenUrl,
+      };
+    } else {
+      throw new InputError(
+        `Invalid or missing 'grantType' in servicenow.oauth configuration. Must be 'client_credentials' or 'password'. Received: ${grantType}`,
+      );
+    }
   }
 
   const userFilterField = serviceNowConfig.getOptionalString('userFilterField');
