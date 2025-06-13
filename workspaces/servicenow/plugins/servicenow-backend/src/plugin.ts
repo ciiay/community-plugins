@@ -21,7 +21,6 @@ import { createRouter } from './router';
 import { catalogServiceRef } from '@backstage/plugin-catalog-node';
 import { createTodoListService } from './services/TodoListService';
 import { readServiceNowConfig, ServiceNowSingleConfig } from './config/config';
-import { fetchIncidents } from './service-now-rest/client';
 
 /**
  * servicenowPlugin backend plugin
@@ -49,8 +48,6 @@ export const servicenowPlugin = createBackendPlugin({
           );
           return;
         }
-
-        await fetchIncidents(servicenowConfig);
 
         const todoListService = await createTodoListService({
           logger,

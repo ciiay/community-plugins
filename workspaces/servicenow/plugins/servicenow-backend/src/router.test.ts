@@ -23,6 +23,15 @@ import request from 'supertest';
 
 import { createRouter } from './router';
 import { TodoListService } from './services/TodoListService/types';
+import { ServiceNowSingleConfig } from './config/config';
+
+// Mock the DefaultServiceNowClient before it's imported by ./router
+const mockFetchIncidents = jest.fn();
+jest.mock('./service-now-rest/client', () => ({
+  DefaultServiceNowClient: jest.fn().mockImplementation(() => ({
+    fetchIncidents: mockFetchIncidents,
+  })),
+}));
 
 const mockTodoItem = {
   title: 'Do the thing',
@@ -31,21 +40,32 @@ const mockTodoItem = {
   createdAt: new Date().toISOString(),
 };
 
-// TEMPLATE NOTE:
-// Testing the router directly allows you to write a unit test that mocks the provided options.
+const mockServiceNowConfig: ServiceNowSingleConfig = {
+  instanceUrl: 'https://dev12345.service-now.com',
+  oauth: {
+    grantType: 'client_credentials',
+    clientId: 'test-client-id',
+    clientSecret: 'test-client-secret',
+  },
+};
+
 describe('createRouter', () => {
   let app: express.Express;
   let todoListService: jest.Mocked<TodoListService>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+
     todoListService = {
       createTodo: jest.fn(),
       listTodos: jest.fn(),
       getTodo: jest.fn(),
     };
     const router = await createRouter({
+      logger: mockServices.logger.mock(),
       httpAuth: mockServices.httpAuth(),
       todoListService,
+      servicenowConfig: mockServiceNowConfig,
     });
     app = express();
     app.use(router);
@@ -65,11 +85,6 @@ describe('createRouter', () => {
 
   it('should not allow unauthenticated requests to create a TODO', async () => {
     todoListService.createTodo.mockResolvedValue(mockTodoItem);
-
-    // TEMPLATE NOTE:
-    // The HttpAuth mock service considers all requests to be authenticated as a
-    // mock user by default. In order to test other cases we need to explicitly
-    // pass an authorization header with mock credentials.
     const response = await request(app)
       .post('/todos')
       .set('Authorization', mockCredentials.none.header())
@@ -78,5 +93,57 @@ describe('createRouter', () => {
       });
 
     expect(response.status).toBe(401);
+  });
+
+  describe('/incidents route', () => {
+    it('should respond to GET request and call fetchIncidents', async () => {
+      const mockIncidentsData = [
+        { id: 'INC123', description: 'Test Incident' },
+      ];
+      mockFetchIncidents.mockResolvedValue(mockIncidentsData);
+
+      const response = await request(app).get(
+        '/incidents?limit=10&offset=0&assignedTo=user1&state=Open&priority=1&shortDescription=network',
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockIncidentsData);
+      expect(mockFetchIncidents).toHaveBeenCalledWith({
+        limit: 10,
+        offset: 0,
+        assignedTo: 'user1',
+        state: 'Open',
+        priority: '1',
+        shortDescription: 'network',
+      });
+    });
+
+    it('should return 400 for invalid limit parameter', async () => {
+      const response = await request(app).get('/incidents?limit=abc');
+      expect(response.status).toBe(400);
+      // mockErrorHandler formats InputError as { error: { name: 'InputError', message: '...' } }
+      expect(response.body.error.message).toContain(
+        'Invalid limit parameter: must be a non-negative number.',
+      );
+    });
+
+    it('should return 400 for invalid offset parameter', async () => {
+      const response = await request(app).get('/incidents?offset=xyz');
+      expect(response.status).toBe(400);
+      expect(response.body.error.message).toContain(
+        'Invalid offset parameter: must be a non-negative number.',
+      );
+    });
+
+    it('should handle errors from serviceNowClient.fetchIncidents (non-InputError)', async () => {
+      mockFetchIncidents.mockRejectedValue(new Error('ServiceNow unavailable'));
+      const response = await request(app).get('/incidents');
+      expect(response.status).toBe(500);
+      // The router's catch block formats this
+      expect(response.body.error).toBe(
+        'Failed to retrieve incidents from ServiceNow.',
+      );
+      expect(response.body.message).toBe('ServiceNow unavailable');
+    });
   });
 });

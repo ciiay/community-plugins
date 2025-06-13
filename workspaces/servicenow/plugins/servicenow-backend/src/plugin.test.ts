@@ -20,16 +20,35 @@ import {
 import { servicenowPlugin } from './plugin';
 import request from 'supertest';
 import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
+import { ConfigReader } from '@backstage/config';
+import {
+  coreServices,
+  createServiceFactory,
+} from '@backstage/backend-plugin-api';
 
-// TEMPLATE NOTE:
-// Plugin tests are integration tests for your plugin, ensuring that all pieces
-// work together end-to-end. You can still mock injected backend services
-// however, just like anyone who installs your plugin might replace the
-// services with their own implementations.
 describe('plugin', () => {
+  const mockConfig = new ConfigReader({
+    servicenow: {
+      instanceUrl: 'https://mock.service-now.com',
+      oauth: {
+        grantType: 'client_credentials',
+        clientId: 'mockClientId',
+        clientSecret: 'mockClientSecret',
+      },
+    },
+  });
+
   it('should create and read TODO items', async () => {
     const { server } = await startTestBackend({
-      features: [servicenowPlugin],
+      features: [
+        servicenowPlugin,
+        catalogServiceMock.factory({ entities: [] }),
+        createServiceFactory({
+          service: coreServices.rootConfig,
+          deps: {},
+          factory: () => mockConfig,
+        }),
+      ],
     });
 
     await request(server).get('/api/servicenow/todos').expect(200, {
@@ -81,6 +100,11 @@ describe('plugin', () => {
               },
             },
           ],
+        }),
+        createServiceFactory({
+          service: coreServices.rootConfig,
+          deps: {},
+          factory: () => mockConfig,
         }),
       ],
     });
