@@ -18,8 +18,6 @@ import {
   createBackendPlugin,
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './router';
-import { catalogServiceRef } from '@backstage/plugin-catalog-node';
-import { createTodoListService } from './services/TodoListService';
 import { readServiceNowConfig, ServiceNowSingleConfig } from './config/config';
 
 /**
@@ -34,11 +32,9 @@ export const servicenowPlugin = createBackendPlugin({
       deps: {
         logger: coreServices.logger,
         config: coreServices.rootConfig,
-        httpAuth: coreServices.httpAuth,
         httpRouter: coreServices.httpRouter,
-        catalog: catalogServiceRef,
       },
-      async init({ logger, config, httpAuth, httpRouter, catalog }) {
+      async init({ logger, config, httpRouter }) {
         const servicenowConfig: ServiceNowSingleConfig | undefined =
           readServiceNowConfig(config);
 
@@ -49,16 +45,9 @@ export const servicenowPlugin = createBackendPlugin({
           return;
         }
 
-        const todoListService = await createTodoListService({
-          logger,
-          catalog,
-        });
-
         httpRouter.use(
           await createRouter({
             logger,
-            httpAuth,
-            todoListService,
             servicenowConfig,
           }),
         );
