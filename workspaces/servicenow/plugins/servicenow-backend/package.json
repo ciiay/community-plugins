@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@backstage-community/plugin-servicenow-common": "workspace:^",
+    "@backstage/backend-common": "^0.25.0",
     "@backstage/backend-defaults": "^0.10.0",
     "@backstage/backend-plugin-api": "^1.3.1",
     "@backstage/catalog-client": "^1.10.0",
