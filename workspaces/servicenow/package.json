@@ -38,6 +38,7 @@
     "@backstage/e2e-test-utils": "^0.1.1",
     "@backstage/repo-tools": "^0.13.4",
     "@changesets/cli": "^2.27.1",
+    "@types/simple-oauth2": "^5",
     "knip": "^5.27.4",
     "node-gyp": "^10.0.0",
     "prettier": "^2.3.2",
@@ -61,5 +62,8 @@
     "*.{json,md}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "simple-oauth2": "^5.1.0"
   }
 }
