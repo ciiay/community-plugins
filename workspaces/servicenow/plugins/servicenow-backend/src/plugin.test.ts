@@ -20,13 +20,13 @@ import {
   createServiceFactory,
 } from '@backstage/backend-plugin-api';
 import { startTestBackend, mockServices } from '@backstage/backend-test-utils';
-import { createRouter } from './router';
-import { readServiceNowConfig } from './config/config';
+import { createRouter } from './service/router';
+import { readServiceNowConfig } from './config';
 import { CatalogClient } from '@backstage/catalog-client';
 import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 
-jest.mock('./router');
-jest.mock('./config/config');
+jest.mock('./service/router');
+jest.mock('./config');
 jest.mock('@backstage/catalog-client');
 
 describe('servicenowPlugin', () => {
