@@ -32,6 +32,7 @@ export interface ServiceNowClient {
     shortDescription?: string;
     limit?: number;
     offset?: number;
+    userEmail: string;
   }): Promise<any>;
 }
 
@@ -169,19 +170,22 @@ export class DefaultServiceNowClient implements ServiceNowClient {
   }
 
   async fetchIncidents(options: {
-    assignedTo?: string;
     state?: string;
     priority?: string;
     shortDescription?: string;
     limit?: number;
     offset?: number;
-  }): Promise<any> {
+    userEmail: string;
+  }): Promise<any[]> {
     const token = await this.getToken();
     const params = new URLSearchParams();
     const queryParts: string[] = [];
 
-    if (options.assignedTo)
-      queryParts.push(`assigned_to=${encodeURIComponent(options.assignedTo)}`);
+    if (options.userEmail) {
+      const id = await this.getUserSysIdByEmail(options.userEmail);
+      queryParts.push(`caller_id=${id}^ORopened_by=${id}^ORassigned_to=${id}`);
+    }
+
     if (options.state)
       queryParts.push(`state=${encodeURIComponent(options.state)}`);
     if (options.priority)
@@ -244,5 +248,23 @@ export class DefaultServiceNowClient implements ServiceNowClient {
         `Failed to fetch incidents from ServiceNow: ${error.message}`,
       );
     }
+  }
+
+  private async getUserSysIdByEmail(email: string): Promise<string | null> {
+    const token = await this.getToken();
+    const url = `${
+      this.instanceUrl
+    }/api/now/table/sys_user?sysparm_query=email=${encodeURIComponent(
+      email,
+    )}&sysparm_fields=sys_id`;
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    });
+    const users = response.data?.result;
+    if (users && users.length > 0) return users[0].sys_id;
+    return null;
   }
 }
