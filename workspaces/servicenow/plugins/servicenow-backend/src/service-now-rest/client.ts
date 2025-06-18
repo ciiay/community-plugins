@@ -47,20 +47,38 @@ export interface ServiceNowClient {
 }
 
 export class DefaultServiceNowClient implements ServiceNowClient {
-  private readonly oauthClient: ClientCredentials | ResourceOwnerPassword;
   private readonly instanceUrl: string;
   private readonly config: ServiceNowSingleConfig;
   private readonly logger: LoggerService;
+  private oauthClient?: ClientCredentials | ResourceOwnerPassword;
 
   constructor(config: ServiceNowSingleConfig, logger: LoggerService) {
     this.config = config;
     this.logger = logger;
     this.instanceUrl = config.instanceUrl.replace(/\/$/, '');
 
-    if (!config.oauth) {
-      logger.error('ServiceNow OAuth configuration is missing.');
-      throw new Error('ServiceNow OAuth configuration is missing.');
+    if (!config.oauth && !config.basicAuth) {
+      logger.error(
+        'ServiceNow authentication configuration is missing. Please configure either OAuth or Basic Auth.',
+      );
+      throw new Error(
+        'ServiceNow authentication configuration is missing. Please configure either OAuth or Basic Auth.',
+      );
     }
+
+    if (config.oauth) {
+      this.setupOAuthClient(config);
+    }
+
+    if (config.basicAuth) {
+      logger.warn(
+        'Basic authentication is configured for ServiceNow. This is not recommended for production environments.',
+      );
+    }
+  }
+
+  private setupOAuthClient(config: ServiceNowSingleConfig) {
+    if (!config.oauth) return;
 
     const determinedTokenUrl =
       config.oauth.tokenUrl ?? `${this.instanceUrl}/oauth_token.do`;
@@ -72,7 +90,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       tokenHost = parsedTokenUrl.origin;
       tokenPath = parsedTokenUrl.pathname;
     } catch (e: any) {
-      logger.error(
+      this.logger.error(
         `Invalid tokenUrl constructed or provided: ${determinedTokenUrl}. Error: ${e.message}`,
       );
       throw new Error(`Invalid tokenUrl: ${determinedTokenUrl}`);
@@ -96,7 +114,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       this.oauthClient = new ClientCredentials(oauthModuleOptions);
     } else if (config.oauth.grantType === 'password') {
       if (!config.oauth.username || !config.oauth.password) {
-        logger.error(
+        this.logger.error(
           "Username and/or password missing for 'password' grant type in ServiceNow OAuth config.",
         );
         throw new Error(
@@ -106,77 +124,78 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       this.oauthClient = new ResourceOwnerPassword(oauthModuleOptions);
     } else {
       const grantType = (config.oauth as any).grantType;
-      logger.error(`Unsupported OAuth grantType: ${grantType}`);
+      this.logger.error(`Unsupported OAuth grantType: ${grantType}`);
       throw new Error(`Unsupported OAuth grantType: ${grantType}`);
     }
   }
 
-  private async getToken(): Promise<string> {
-    if (!this.config.oauth) {
-      this.logger.error('OAuth configuration is missing in getToken call.');
-      throw new Error('OAuth configuration is missing for token retrieval.');
+  private async getAuthHeaders(): Promise<{ Authorization: string }> {
+    if (this.config.basicAuth) {
+      const { username, password } = this.config.basicAuth;
+      const encodedCredentials = Buffer.from(
+        `${username}:${password}`,
+      ).toString('base64');
+      return { Authorization: `Basic ${encodedCredentials}` };
     }
-    let accessToken: AccessToken;
-    try {
-      if (this.config.oauth.grantType === 'client_credentials') {
-        accessToken = await (this.oauthClient as ClientCredentials).getToken(
-          {},
-        );
-      } else if (this.config.oauth.grantType === 'password') {
-        if (!this.config.oauth.username || !this.config.oauth.password) {
-          this.logger.error(
-            "Cannot get token for 'password' grant: username or password missing.",
+
+    if (this.config.oauth && this.oauthClient) {
+      let accessToken: AccessToken;
+      try {
+        if (this.config.oauth.grantType === 'client_credentials') {
+          accessToken = await (this.oauthClient as ClientCredentials).getToken(
+            {},
           );
+        } else if (this.config.oauth.grantType === 'password') {
+          if (!this.config.oauth.username || !this.config.oauth.password) {
+            throw new Error(
+              "Username or password missing for 'password' grant type during token acquisition.",
+            );
+          }
+          accessToken = await (
+            this.oauthClient as ResourceOwnerPassword
+          ).getToken({
+            username: this.config.oauth.username,
+            password: this.config.oauth.password,
+          });
+        } else {
           throw new Error(
-            "Username or password missing for 'password' grant type during token acquisition.",
+            `Unsupported grantType in getAuthHeaders: ${
+              (this.config.oauth as any).grantType
+            }`,
           );
         }
-        accessToken = await (
-          this.oauthClient as ResourceOwnerPassword
-        ).getToken({
-          username: this.config.oauth.username,
-          password: this.config.oauth.password,
-        });
-      } else {
-        const grantType = (this.config.oauth as any).grantType;
-        this.logger.error(
-          `getToken called with unsupported grantType: ${grantType}`,
-        );
-        throw new Error(`Unsupported grantType in getToken: ${grantType}`);
-      }
 
-      const tokenData = accessToken.token;
-      // Ensure tokenData and access_token are valid
-      if (
-        !tokenData ||
-        typeof tokenData.access_token !== 'string' ||
-        !tokenData.access_token
-      ) {
-        this.logger.error(
-          'Failed to obtain a valid access_token string from ServiceNow token object.',
-        );
-        throw new Error(
-          'Failed to obtain access_token string (token data is invalid or missing).',
-        );
+        const tokenData = accessToken.token;
+        if (
+          !tokenData ||
+          typeof tokenData.access_token !== 'string' ||
+          !tokenData.access_token
+        ) {
+          throw new Error(
+            'Failed to obtain access_token string (token data is invalid or missing).',
+          );
+        }
+        return { Authorization: `Bearer ${tokenData.access_token}` };
+      } catch (error: any) {
+        this.logger.error(`Error fetching ServiceNow token: ${error.message}`, {
+          error: error.stack || error,
+        });
+        if (error.isAxiosError && error.response) {
+          this.logger.error(
+            `OAuth2 token error details: Status ${
+              error.response.status
+            }, Data: ${JSON.stringify(error.response.data)}`,
+          );
+        } else if (error.data && error.data.payload) {
+          this.logger.error(
+            `OAuth2 token error payload: ${JSON.stringify(error.data.payload)}`,
+          );
+        }
+        throw new Error(`Failed to obtain access token: ${error.message}`);
       }
-      return tokenData.access_token;
-    } catch (error: any) {
-      this.logger.error(`Error fetching ServiceNow token: ${error.message}`, {
-        error: error.stack || error,
-      });
-      if (error.isAxiosError && error.response) {
-        this.logger.error(
-          `OAuth2 token error details: Status ${
-            error.response.status
-          }, Data: ${JSON.stringify(error.response.data)}`,
-        );
-      } else if (error.data && error.data.payload) {
-        this.logger.error(
-          `OAuth2 token error payload: ${JSON.stringify(error.data.payload)}`,
-        );
-      }
-      throw new Error(`Failed to obtain access token: ${error.message}`);
     }
+
+    throw new Error('No authentication method configured.');
   }
 
   async fetchIncidents(options: {
@@ -187,7 +206,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     offset?: number;
     userEmail: string;
   }): Promise<IncidentPick[]> {
-    const token = await this.getToken();
+    const authHeaders = await this.getAuthHeaders();
     const params = new URLSearchParams();
     const queryParts: string[] = [];
 
@@ -231,7 +250,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     try {
       const response = await axios.get(requestUrl, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...authHeaders,
           Accept: 'application/json',
         },
         timeout: 30000,
@@ -265,7 +284,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
   }
 
   private async getUserSysIdByEmail(email: string): Promise<string | null> {
-    const token = await this.getToken();
+    const authHeaders = await this.getAuthHeaders();
     const url = `${
       this.instanceUrl
     }/api/now/table/sys_user?sysparm_query=email=${encodeURIComponent(
@@ -273,7 +292,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     )}&sysparm_fields=sys_id`;
     const response = await axios.get(url, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...authHeaders,
         Accept: 'application/json',
       },
     });
