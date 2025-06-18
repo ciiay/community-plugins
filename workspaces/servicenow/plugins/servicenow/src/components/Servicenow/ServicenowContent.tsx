@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  MouseEvent,
-  ChangeEvent,
-  useCallback,
+
+import React, {
   useEffect,
   useState,
+  useCallback,
+  MouseEvent,
+  ChangeEvent,
 } from 'react';
+import { useApi } from '@backstage/core-plugin-api';
 import { useSearchParams } from 'react-router-dom';
 
 import { CatalogFilterLayout } from '@backstage/plugin-catalog-react';
@@ -33,12 +35,13 @@ import { IncidentsTableBody } from './IncidentsTableBody';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
 import { IncidentTableFieldEnum, SortingOrderEnum } from '../../types';
 import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
-import { mockIncidents } from '../../mocks/mockData';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useQueryState } from '../../hooks/useQueryState';
+import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
 
 export const ServicenowContent = () => {
-  const incidents = mockIncidents;
+  const serviceNowApi = useApi(serviceNowApiRef);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [input, setInput] = useState(() => searchParams.get('search') ?? '');
   const debouncedSearch = useDebouncedValue(input, 300);
@@ -57,6 +60,10 @@ export const ServicenowContent = () => {
   const [offset, setOffset] = useQueryState<number>('offset', 0);
 
   const pageNumber = Math.floor(offset / rowsPerPage);
+
+  const [incidents, setIncidents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setSearchParams(
@@ -77,27 +84,33 @@ export const ServicenowContent = () => {
     );
   }, [debouncedSearch, rowsPerPage, offset, order, orderBy, setSearchParams]);
 
-  const queryParams = buildIncidentQueryParams({
-    entityId: 'my-service-id',
-    limit: rowsPerPage,
-    offset,
-    order,
-    orderBy,
-    search: debouncedSearch,
-  });
+  useEffect(() => {
+    async function fetchIncidents() {
+      setLoading(true);
+      setError(null);
+      try {
+        const queryParams = buildIncidentQueryParams({
+          entityId: 'my-service-id',
+          limit: rowsPerPage,
+          offset,
+          order,
+          orderBy,
+          search: debouncedSearch,
+        });
 
-  // eslint-disable-next-line no-console
-  console.log('Backend-ready query:', queryParams.toString());
+        const data =
+          await serviceNowApi.getIncidents(/* queryParams.toString()*/);
+        setIncidents(data);
+      } catch (e) {
+        setError((e as Error).message);
+        setIncidents([]);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-  // Placeholder for future backend fetch
-  // useEffect(() => {
-  //   fetch(`https://<instance>.service-now.com/api/now/table/incident?${queryParams}`)
-  //     .then(res => res.json())
-  //     .then(json => setData(json.result))
-  //     .catch(err => console.error(err));
-  // }, [offset, rowsPerPage, debouncedSearch, orderBy]);
-
-  const paginatedIncidents = incidents.slice(offset, offset + rowsPerPage);
+    fetchIncidents();
+  }, [rowsPerPage, offset, order, orderBy, debouncedSearch, serviceNowApi]);
 
   const updateQueryParams = useCallback(
     (key: string, value: string | number) => {
@@ -127,7 +140,7 @@ export const ServicenowContent = () => {
     _event: MouseEvent<unknown>,
     property: IncidentTableFieldEnum,
   ) => {
-    const isAsc = orderBy === property && order === 'asc';
+    const isAsc = orderBy === property && order === SortingOrderEnum.Asc;
     setOrder(isAsc ? SortingOrderEnum.Desc : SortingOrderEnum.Asc);
     setOrderBy(property);
   };
@@ -136,6 +149,18 @@ export const ServicenowContent = () => {
     setInput(str);
     updateQueryParams('offset', 0);
   };
+
+  if (loading) {
+    return <Box sx={{ padding: 2 }}>Loading incidents...</Box>;
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ padding: 2, color: 'error.main' }}>
+        Error loading incidents: {error}
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -153,7 +178,7 @@ export const ServicenowContent = () => {
         </CatalogFilterLayout.Filters>
         <CatalogFilterLayout.Content>
           <Table
-            data={paginatedIncidents}
+            data={incidents}
             columns={IncidentsListColumns}
             onSearchChange={handleSearch}
             title={
@@ -174,7 +199,7 @@ export const ServicenowContent = () => {
                   onRequestSort={handleRequestSort}
                 />
               ),
-              Body: () => <IncidentsTableBody rows={paginatedIncidents} />,
+              Body: () => <IncidentsTableBody rows={incidents} />,
               Pagination: () => (
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 20, 50, 100].map(n => ({
@@ -182,9 +207,7 @@ export const ServicenowContent = () => {
                     label: `${n} rows`,
                   }))}
                   component="div"
-                  sx={{
-                    mr: 1,
-                  }}
+                  sx={{ mr: 1 }}
                   count={incidents.length ?? 0}
                   rowsPerPage={rowsPerPage}
                   page={pageNumber}

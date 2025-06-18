@@ -2791,6 +2791,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@backstage-community/plugin-servicenow@workspace:plugins/servicenow"
   dependencies:
+    "@backstage-community/plugin-servicenow-common": "workspace:^"
     "@backstage/cli": "npm:^0.32.1"
     "@backstage/core-app-api": "npm:^1.17.0"
     "@backstage/core-components": "npm:^0.17.2"
