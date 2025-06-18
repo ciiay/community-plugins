@@ -15,7 +15,8 @@
  */
 import { TableColumn } from '@backstage/core-components';
 
-import { IncidentsData, IncidentTableFieldEnum } from '../../types';
+import { IncidentTableFieldEnum } from '../../types';
+import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
 
 export const IncidentsListColumns: TableColumn<IncidentsData>[] = [
   {

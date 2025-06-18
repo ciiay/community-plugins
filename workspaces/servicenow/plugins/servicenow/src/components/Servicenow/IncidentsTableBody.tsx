@@ -19,9 +19,9 @@ import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 
-import { IncidentsData } from '../../types';
 import { IncidentsListColumns } from './IncidentsListColumns';
 import { IncidentsTableRow } from './IncidentsTableRow';
+import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
 
 export const IncidentsTableBody = ({ rows }: { rows: IncidentsData[] }) => {
   // TODO: Add loading and error states

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, {
+import {
   useEffect,
   useState,
   useCallback,
@@ -38,6 +38,7 @@ import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useQueryState } from '../../hooks/useQueryState';
 import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
+import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
 
 export const ServicenowContent = () => {
   const serviceNowApi = useApi(serviceNowApiRef);
@@ -61,7 +62,7 @@ export const ServicenowContent = () => {
 
   const pageNumber = Math.floor(offset / rowsPerPage);
 
-  const [incidents, setIncidents] = useState<any[]>([]);
+  const [incidents, setIncidents] = useState<IncidentsData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

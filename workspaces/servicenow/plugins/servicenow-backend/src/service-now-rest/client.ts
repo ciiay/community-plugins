@@ -23,7 +23,16 @@ import {
 } from 'simple-oauth2';
 import axios from 'axios';
 import { ServiceNowSingleConfig } from '../config';
-import { Incident } from '@backstage-community/plugin-servicenow-common';
+
+// Types for ServiceNow incidents, but with cutted down fields
+export type IncidentPick = {
+  number: string;
+  short_description: string;
+  description: string;
+  sys_created_on: string;
+  priority: number;
+  incident_state: number;
+};
 
 export interface ServiceNowClient {
   fetchIncidents(options: {
@@ -34,7 +43,7 @@ export interface ServiceNowClient {
     limit?: number;
     offset?: number;
     userEmail: string;
-  }): Promise<Incident[]>;
+  }): Promise<IncidentPick[]>;
 }
 
 export class DefaultServiceNowClient implements ServiceNowClient {
@@ -177,7 +186,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     limit?: number;
     offset?: number;
     userEmail: string;
-  }): Promise<Incident[]> {
+  }): Promise<IncidentPick[]> {
     const token = await this.getToken();
     const params = new URLSearchParams();
     const queryParts: string[] = [];

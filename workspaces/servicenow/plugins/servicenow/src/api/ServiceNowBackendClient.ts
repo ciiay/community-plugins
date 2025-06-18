@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Incident } from '@backstage-community/plugin-servicenow-common';
+import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
 import {
   createApiRef,
   DiscoveryApi,
@@ -22,7 +22,7 @@ import {
 } from '@backstage/core-plugin-api';
 
 export interface ServiceNowBackendAPI {
-  getIncidents(): Promise<Incident[]>;
+  getIncidents(): Promise<IncidentsData[]>;
 }
 
 export const serviceNowApiRef = createApiRef<ServiceNowBackendAPI>({
@@ -51,7 +51,7 @@ export class ServiceNowBackendClient implements ServiceNowBackendAPI {
     return (await response.json()) as T;
   }
 
-  async getIncidents(): Promise<Incident[]> {
-    return this.fetchFromServiceNow<Incident[]>('/incidents');
+  async getIncidents(): Promise<IncidentsData[]> {
+    return this.fetchFromServiceNow<IncidentsData[]>('/incidents');
   }
 }
