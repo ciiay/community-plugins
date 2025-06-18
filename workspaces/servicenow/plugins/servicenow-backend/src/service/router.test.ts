@@ -32,13 +32,11 @@ import {
   CatalogServiceMock,
   catalogServiceMock,
 } from '@backstage/plugin-catalog-node/testUtils';
-import { ServiceNowSingleConfig } from './config/config';
+import { ServiceNowSingleConfig } from '../config';
 
 const mockFetchIncidents = jest.fn();
-jest.mock('./service-now-rest/client', () => {
-  const originalModule = jest.requireActual('./service-now-rest/client');
+jest.mock('../service-now-rest/client', () => {
   return {
-    ...originalModule,
     DefaultServiceNowClient: jest.fn().mockImplementation(() => ({
       fetchIncidents: mockFetchIncidents,
     })),
