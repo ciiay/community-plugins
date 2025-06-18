@@ -23,6 +23,7 @@ import {
 } from 'simple-oauth2';
 import axios from 'axios';
 import { ServiceNowSingleConfig } from '../config';
+import { Incident } from '@backstage-community/plugin-servicenow-common';
 
 export interface ServiceNowClient {
   fetchIncidents(options: {
@@ -33,7 +34,7 @@ export interface ServiceNowClient {
     limit?: number;
     offset?: number;
     userEmail: string;
-  }): Promise<any>;
+  }): Promise<Incident[]>;
 }
 
 export class DefaultServiceNowClient implements ServiceNowClient {
@@ -176,7 +177,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     limit?: number;
     offset?: number;
     userEmail: string;
-  }): Promise<any[]> {
+  }): Promise<Incident[]> {
     const token = await this.getToken();
     const params = new URLSearchParams();
     const queryParts: string[] = [];
