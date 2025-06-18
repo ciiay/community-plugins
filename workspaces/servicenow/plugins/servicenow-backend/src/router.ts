@@ -154,14 +154,14 @@ export async function createRouter(
 
       const incidents = await client.fetchIncidents(fetchOptions);
       res.json(incidents);
-    } catch (error: any) {
-      logger.error(`Failed to fetch incidents: ${error.message}`, {
-        stack: error.stack,
-        status: error.status,
-        name: error.name,
-      });
+    } catch (error) {
+      if (error instanceof InputError) {
+        throw error;
+      }
 
-      throw error;
+      // Log the full error and throw a generic one
+      logger.error('Failed to fetch incidents from ServiceNow', error);
+      throw new Error('Failed to fetch incidents from ServiceNow');
     }
   });
 
