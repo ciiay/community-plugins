@@ -22,7 +22,7 @@ import {
   AccessToken,
 } from 'simple-oauth2';
 import axios from 'axios';
-import { ServiceNowSingleConfig } from '../config/config';
+import { ServiceNowSingleConfig } from '../config';
 
 export interface ServiceNowClient {
   fetchIncidents(options: {

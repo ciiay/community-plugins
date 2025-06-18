@@ -26,8 +26,8 @@ import {
 } from '@backstage/backend-plugin-api';
 import express from 'express';
 import Router from 'express-promise-router';
-import { ServiceNowSingleConfig } from './config/config';
-import { DefaultServiceNowClient } from './service-now-rest/client';
+import { ServiceNowSingleConfig } from '../config';
+import { DefaultServiceNowClient } from '../service-now-rest/client';
 import type { CatalogApi } from '@backstage/catalog-client';
 import { Entity } from '@backstage/catalog-model';
 
