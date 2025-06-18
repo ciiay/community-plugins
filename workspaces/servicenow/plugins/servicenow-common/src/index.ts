@@ -21,15 +21,18 @@
  */
 
 /**
- * Initial common type
+ * Incident common type - represents a ServiceNow incident, but with limited set of the fields.
+ * So, it is not meant to be a complete representation of a ServiceNow incident.
+ * This is used to ensure that the incident data is consistent across different parts of the plugin.
+ * It should be used in the frontend to display incident data in a consistent way.
+ * It is used in the backend to fetch incident data from ServiceNow.
  * @public
  */
-export type CommonType = {
-  field: string;
+export type Incident = {
+  number: string;
+  short_description: string;
+  description: string;
+  sys_created_on: string;
+  priority: string;
+  incident_state: string;
 };
-
-/**
- * Initial common constant
- * @public
- */
-export const COMMON_CONSTANT = 1;
