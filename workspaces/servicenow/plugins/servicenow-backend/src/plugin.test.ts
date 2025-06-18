@@ -13,169 +13,100 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ConfigReader } from '@backstage/config';
+
+import { servicenowPlugin } from './plugin';
 import {
   coreServices,
   createServiceFactory,
 } from '@backstage/backend-plugin-api';
 import { startTestBackend, mockServices } from '@backstage/backend-test-utils';
-import request from 'supertest';
+import { createRouter } from './router';
+import { readServiceNowConfig } from './config/config';
+import { CatalogClient } from '@backstage/catalog-client';
+import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 
-const mockFetchIncidents = jest.fn();
-
-const validServicenowConfig = new ConfigReader({
-  servicenow: {
-    instanceUrl: 'https://mock.service-now.com',
-    oauth: {
-      grantType: 'client_credentials',
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
-    },
-  },
-});
+jest.mock('./router');
+jest.mock('./config/config');
+jest.mock('@backstage/catalog-client');
 
 describe('servicenowPlugin', () => {
-  let MockedDefaultServiceNowClientConstructor: jest.Mock;
+  const mockRouter = jest.fn();
+  const mockConfig = {
+    data: {
+      servicenow: {
+        instanceUrl: 'https://dev12345.service-now.com',
+      },
+    },
+  };
 
   beforeEach(() => {
-    jest.resetModules();
-
-    mockFetchIncidents.mockReset();
-
-    MockedDefaultServiceNowClientConstructor = jest
-      .fn()
-      .mockImplementation(() => {
-        return {
-          fetchIncidents: mockFetchIncidents,
-        };
-      });
-
-    jest.doMock('./service-now-rest/client', () => {
-      return {
-        DefaultServiceNowClient: MockedDefaultServiceNowClientConstructor,
-      };
-    });
+    jest.resetAllMocks();
+    (createRouter as jest.Mock).mockReturnValue(mockRouter);
   });
 
-  it('should start and expose health check endpoint when configured', async () => {
-    const { servicenowPlugin } = require('./plugin');
-
-    const { server } = await startTestBackend({
-      features: [
-        servicenowPlugin,
-        createServiceFactory({
-          service: coreServices.rootConfig,
-          deps: {},
-          factory: () => validServicenowConfig,
-        }),
-        mockServices.logger.factory(),
-      ],
-    });
-
-    const agent = request.agent(server);
-    const response = await agent.get('/api/servicenow/health');
-
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual({ status: 'ok' });
-    await server.stop();
-  });
-
-  it('should respond to /incidents if configured', async () => {
-    const { servicenowPlugin } = require('./plugin');
-    const mockIncidentsData = [
-      { id: 'INC001', short_description: 'Test incident' },
-    ];
-    mockFetchIncidents.mockResolvedValueOnce(mockIncidentsData);
-
-    const { server } = await startTestBackend({
-      features: [
-        servicenowPlugin,
-        createServiceFactory({
-          service: coreServices.rootConfig,
-          deps: {},
-          factory: () => validServicenowConfig,
-        }),
-        mockServices.logger.factory(),
-      ],
-    });
-    const agent = request.agent(server);
-    const response = await agent.get('/api/servicenow/incidents?limit=1');
-
-    expect(response.status).toBe(200);
-    expect(response.body).toEqual(mockIncidentsData);
-    expect(MockedDefaultServiceNowClientConstructor).toHaveBeenCalledTimes(1);
-    expect(mockFetchIncidents).toHaveBeenCalledTimes(1);
-    expect(mockFetchIncidents).toHaveBeenCalledWith({
-      limit: 1,
-      offset: undefined,
-      assignedTo: undefined,
-      state: undefined,
-      priority: undefined,
-      shortDescription: undefined,
-    });
-    await server.stop();
-  });
-
-  it('should not initialize main routes if servicenow config is missing', async () => {
-    const { servicenowPlugin } = require('./plugin');
-    const logger = mockServices.logger.mock();
-
-    const { server } = await startTestBackend({
-      features: [
-        servicenowPlugin,
-        createServiceFactory({
-          service: coreServices.logger,
-          deps: {},
-          factory: () => logger,
-        }),
-        createServiceFactory({
-          service: coreServices.rootConfig,
-          deps: {},
-          factory: () => new ConfigReader({}),
-        }),
-      ],
-    });
-
-    expect(logger.error).toHaveBeenCalledWith(
-      'ServiceNow plugin configuration is missing. The plugin will not be initialized.',
+  it('should be initialized with a valid configuration', async () => {
+    (readServiceNowConfig as jest.Mock).mockReturnValue(
+      mockConfig.data.servicenow,
     );
 
-    const agent = request.agent(server);
-    const incidentsResponse = await agent
-      .get('/api/servicenow/incidents')
-      .catch(e => e.response);
-    expect(incidentsResponse.status).toBe(404);
+    const catalogApi = catalogServiceMock();
+    (CatalogClient as jest.Mock).mockImplementation(() => {
+      return catalogApi;
+    });
 
-    const healthResponse = await agent
-      .get('/api/servicenow/health')
-      .catch(e => e.response);
-    expect(healthResponse.status).toBe(404);
-    await server.stop();
-  });
+    const httpRouter = mockServices.httpRouter.mock();
 
-  it('should handle errors from serviceNowClient.fetchIncidents', async () => {
-    const { servicenowPlugin } = require('./plugin');
-    mockFetchIncidents.mockRejectedValueOnce(new Error('ServiceNow API Error'));
-
-    const { server } = await startTestBackend({
+    await startTestBackend({
       features: [
         servicenowPlugin,
-        createServiceFactory({
-          service: coreServices.rootConfig,
-          deps: {},
-          factory: () => validServicenowConfig,
-        }),
         mockServices.logger.factory(),
+        mockServices.rootConfig.factory({ data: mockConfig.data }),
+        createServiceFactory({
+          service: coreServices.httpRouter,
+          deps: {},
+          factory: () => httpRouter,
+        }),
+        mockServices.httpAuth.factory(),
+        mockServices.auth.factory(),
+        mockServices.userInfo.factory(),
+        mockServices.discovery.factory(),
       ],
     });
 
-    const agent = request.agent(server);
-    const response = await agent.get('/api/servicenow/incidents');
+    expect(readServiceNowConfig).toHaveBeenCalled();
+    expect(createRouter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        servicenowConfig: mockConfig.data.servicenow,
+        catalogApi: catalogApi,
+      }),
+    );
+    expect(httpRouter.use).toHaveBeenCalledWith(mockRouter);
+  });
 
-    expect(response.status).toBe(500);
-    expect(response.body.error.message).toBe('ServiceNow API Error');
-    expect(MockedDefaultServiceNowClientConstructor).toHaveBeenCalledTimes(1);
-    expect(mockFetchIncidents).toHaveBeenCalledTimes(1);
-    await server.stop();
+  it('should not initialize if configuration is missing', async () => {
+    (readServiceNowConfig as jest.Mock).mockReturnValue(undefined);
+
+    const httpRouter = mockServices.httpRouter.mock();
+
+    await startTestBackend({
+      features: [
+        servicenowPlugin,
+        mockServices.logger.factory(),
+        mockServices.rootConfig.factory({ data: {} }),
+        createServiceFactory({
+          service: coreServices.httpRouter,
+          deps: {},
+          factory: () => httpRouter,
+        }),
+        mockServices.httpAuth.factory(),
+        mockServices.auth.factory(),
+        mockServices.userInfo.factory(),
+        mockServices.discovery.factory(),
+      ],
+    });
+
+    expect(readServiceNowConfig).toHaveBeenCalled();
+    expect(createRouter).not.toHaveBeenCalled();
+    expect(httpRouter.use).not.toHaveBeenCalled();
   });
 });
