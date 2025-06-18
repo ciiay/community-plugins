@@ -38,12 +38,21 @@ export type ServiceNowOAuthConfig =
     };
 
 /**
+ * @public
+ */
+export type ServiceNowBasicAuthConfig = {
+  username: string;
+  password: string;
+};
+
+/**
  * Defines the configuration for a single ServiceNow instance.
  * @public
  */
 export interface ServiceNowSingleConfig {
   instanceUrl: string;
   oauth?: ServiceNowOAuthConfig;
+  basicAuth?: ServiceNowBasicAuthConfig;
   userFilterField?: string;
 }
 
@@ -72,6 +81,15 @@ export function readServiceNowConfig(
 
   let oauth: ServiceNowOAuthConfig | undefined = undefined;
   const oauthConfig = serviceNowConfig.getOptionalConfig('oauth');
+
+  let basicAuth: ServiceNowBasicAuthConfig | undefined = undefined;
+  const basicAuthConfig = serviceNowConfig.getOptionalConfig('basicAuth');
+
+  if (oauthConfig && basicAuthConfig) {
+    throw new InputError(
+      'Both servicenow.oauth and servicenow.basicAuth are configured. Please use only one.',
+    );
+  }
 
   if (oauthConfig) {
     const grantType = oauthConfig.getString('grantType');
@@ -128,11 +146,31 @@ export function readServiceNowConfig(
     }
   }
 
+  if (basicAuthConfig) {
+    const username = basicAuthConfig.getString('username');
+    const password = basicAuthConfig.getString('password');
+    if (!username) {
+      throw new InputError(
+        'Missing required config value at servicenow.basicAuth.username',
+      );
+    }
+    if (!password) {
+      throw new InputError(
+        'Missing required config value at servicenow.basicAuth.password',
+      );
+    }
+    basicAuth = {
+      username,
+      password,
+    };
+  }
+
   const userFilterField = serviceNowConfig.getOptionalString('userFilterField');
 
   return {
     instanceUrl,
     oauth,
+    basicAuth,
     userFilterField,
   };
 }

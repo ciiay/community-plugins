@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export type ServiceNowOAuthConfig =
+export type OAuthConfig =
   | {
       grantType: 'client_credentials';
       clientId: string;
@@ -30,10 +30,16 @@ export type ServiceNowOAuthConfig =
       tokenUrl?: string;
     };
 
+export type BasicAuthConfig = {
+  username: string;
+  password: string;
+};
+
 export interface Config {
   servicenow?: {
     instanceUrl: string;
-    oauth?: ServiceNowOAuthConfig;
+    basicAuth?: BasicAuthConfig;
+    oauth?: OAuthConfig;
     userFilterField?: string;
   };
 }
