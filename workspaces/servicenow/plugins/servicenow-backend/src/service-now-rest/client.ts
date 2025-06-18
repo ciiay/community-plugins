@@ -206,6 +206,10 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     if (options.offset !== undefined) {
       params.append('sysparm_offset', String(options.offset));
     }
+    params.append(
+      'sysparm_fields',
+      'number,short_description,description,sys_created_on,priority,incident_state',
+    );
 
     const requestUrl = `${
       this.instanceUrl
