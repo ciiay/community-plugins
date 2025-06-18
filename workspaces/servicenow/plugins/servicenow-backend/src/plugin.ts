@@ -17,8 +17,8 @@ import {
   coreServices,
   createBackendPlugin,
 } from '@backstage/backend-plugin-api';
-import { createRouter } from './router';
-import { readServiceNowConfig, ServiceNowSingleConfig } from './config/config';
+import { createRouter } from './service';
+import { readServiceNowConfig, ServiceNowSingleConfig } from './config';
 import { CatalogClient } from '@backstage/catalog-client';
 
 /**
