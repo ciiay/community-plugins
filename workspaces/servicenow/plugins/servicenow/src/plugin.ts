@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 import {
+  createApiFactory,
   createPlugin,
   createRoutableExtension,
+  discoveryApiRef,
+  fetchApiRef,
+  identityApiRef,
 } from '@backstage/core-plugin-api';
 
 import { rootRouteRef } from './routes';
+import {
+  serviceNowApiRef,
+  ServiceNowBackendClient,
+} from './api/ServiceNowBackendClient';
 
 /**
  * Servicenow Plugin
@@ -26,6 +34,18 @@ import { rootRouteRef } from './routes';
  */
 export const servicenowPlugin = createPlugin({
   id: 'servicenow',
+  apis: [
+    createApiFactory({
+      api: serviceNowApiRef,
+      deps: {
+        discoveryApi: discoveryApiRef,
+        fetchApi: fetchApiRef,
+        identityApi: identityApiRef,
+      },
+      factory: ({ discoveryApi, fetchApi, identityApi }) =>
+        new ServiceNowBackendClient(discoveryApi, fetchApi, identityApi),
+    }),
+  ],
   routes: {
     root: rootRouteRef,
   },
