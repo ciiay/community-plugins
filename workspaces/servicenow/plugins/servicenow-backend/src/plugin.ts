@@ -35,8 +35,8 @@ export const servicenowPlugin = createBackendPlugin({
         config: coreServices.rootConfig,
         httpRouter: coreServices.httpRouter,
         httpAuth: coreServices.httpAuth,
-        userInfoService: coreServices.userInfo,
         auth: coreServices.auth,
+        userInfoService: coreServices.userInfo,
         discovery: coreServices.discovery,
       },
       async init({
