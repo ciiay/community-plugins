@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export type Incident = {
+export type IncidentsData = {
   number: string;
-  short_description: string;
+  shortDescription: string;
   description: string;
-  sys_created_on: string;
-  priority: string;
-  incident_state: string;
+  sysCreatedOn: string;
+  priority: number;
+  incidentState: number;
 };

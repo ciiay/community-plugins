@@ -16,7 +16,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { IncidentsTableBody } from './IncidentsTableBody';
-import { IncidentsData } from '../../types';
+import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
 
 const mockRows: IncidentsData[] = [
   {

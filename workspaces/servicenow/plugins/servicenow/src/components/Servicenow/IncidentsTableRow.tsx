@@ -23,11 +23,11 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 
 import { convertDateFormat } from '../../utils/stringUtils';
-import { IncidentsData } from '../../types';
 import {
   getIncidentStateValue,
   getPriorityValue,
 } from '../../utils/incidentUtils';
+import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
 
 const useStyles = makeStyles(() => ({
   tableCellStyle: {
