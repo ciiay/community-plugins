@@ -22,7 +22,7 @@ import {
 } from '@backstage/core-plugin-api';
 
 export interface ServiceNowBackendAPI {
-  getIncidents(): Promise<IncidentsData[]>;
+  getIncidents(queryParams: URLSearchParams): Promise<IncidentsData[]>;
 }
 
 export const serviceNowApiRef = createApiRef<ServiceNowBackendAPI>({
@@ -36,9 +36,12 @@ export class ServiceNowBackendClient implements ServiceNowBackendAPI {
     private readonly identityApi: IdentityApi,
   ) {}
 
-  private async fetchFromServiceNow<T>(path: string): Promise<T> {
+  private async fetchFromServiceNow<T>(
+    path: string,
+    queryParams?: URLSearchParams,
+  ): Promise<T> {
     const proxyBase = await this.discoveryApi.getBaseUrl('servicenow');
-    const url = `${proxyBase}${path}`;
+    const url = `${proxyBase}${path}${queryParams ? `?${queryParams}` : ''}`;
 
     const { token } = await this.identityApi.getCredentials();
     const headers = {
@@ -51,7 +54,7 @@ export class ServiceNowBackendClient implements ServiceNowBackendAPI {
     return (await response.json()) as T;
   }
 
-  async getIncidents(): Promise<IncidentsData[]> {
-    return this.fetchFromServiceNow<IncidentsData[]>('/incidents');
+  async getIncidents(queryParams: URLSearchParams): Promise<IncidentsData[]> {
+    return this.fetchFromServiceNow<IncidentsData[]>('/incidents', queryParams);
   }
 }

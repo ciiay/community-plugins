@@ -99,8 +99,7 @@ export const ServicenowContent = () => {
           search: debouncedSearch,
         });
 
-        const data =
-          await serviceNowApi.getIncidents(/* queryParams.toString()*/);
+        const data = await serviceNowApi.getIncidents(queryParams);
         setIncidents(data);
       } catch (e) {
         setError((e as Error).message);

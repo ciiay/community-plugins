@@ -30,6 +30,7 @@ import { ServiceNowSingleConfig } from '../config';
 import {
   DefaultServiceNowClient,
   IncidentPick,
+  IncidentQueryParams,
 } from '../service-now-rest/client';
 import type { CatalogApi } from '@backstage/catalog-client';
 import { Entity } from '@backstage/catalog-model';
@@ -76,7 +77,7 @@ export async function createRouter(
     const {
       state,
       priority,
-      shortDescription,
+      search,
       limit: limitStr,
       offset: offsetStr,
     } = req.query;
@@ -119,21 +120,13 @@ export async function createRouter(
       );
     }
 
-    const fetchOptions: {
-      state?: string;
-      priority?: string;
-      shortDescription?: string;
-      limit?: number;
-      offset?: number;
-      userEmail: string;
-    } = {
+    const fetchOptions: IncidentQueryParams = {
       userEmail: userEmail,
     };
 
     if (state) fetchOptions.state = String(state);
     if (priority) fetchOptions.priority = String(priority);
-    if (shortDescription)
-      fetchOptions.shortDescription = String(shortDescription);
+    if (search) fetchOptions.search = String(search);
 
     try {
       if (limitStr !== undefined) {

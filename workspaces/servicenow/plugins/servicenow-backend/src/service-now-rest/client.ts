@@ -34,16 +34,17 @@ export type IncidentPick = {
   incident_state: number;
 };
 
+export type IncidentQueryParams = {
+  state?: string;
+  priority?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+  userEmail: string;
+};
+
 export interface ServiceNowClient {
-  fetchIncidents(options: {
-    assignedTo?: string;
-    state?: string;
-    priority?: string;
-    shortDescription?: string;
-    limit?: number;
-    offset?: number;
-    userEmail: string;
-  }): Promise<IncidentPick[]>;
+  fetchIncidents(options: IncidentQueryParams): Promise<IncidentPick[]>;
 }
 
 export class DefaultServiceNowClient implements ServiceNowClient {
@@ -198,14 +199,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     throw new Error('No authentication method configured.');
   }
 
-  async fetchIncidents(options: {
-    state?: string;
-    priority?: string;
-    shortDescription?: string;
-    limit?: number;
-    offset?: number;
-    userEmail: string;
-  }): Promise<IncidentPick[]> {
+  async fetchIncidents(options: IncidentQueryParams): Promise<IncidentPick[]> {
     const authHeaders = await this.getAuthHeaders();
     const params = new URLSearchParams();
     const queryParts: string[] = [];
@@ -219,12 +213,12 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       queryParts.push(`state=${encodeURIComponent(options.state)}`);
     if (options.priority)
       queryParts.push(`priority=${encodeURIComponent(options.priority)}`);
-    if (options.shortDescription)
+    if (options.search) {
+      const searchTerm = encodeURIComponent(options.search);
       queryParts.push(
-        `short_descriptionCONTAINS${encodeURIComponent(
-          options.shortDescription,
-        )}`,
+        `short_descriptionLIKE${searchTerm}^ORdescriptionLIKE${searchTerm}`,
       );
+    }
 
     if (queryParts.length > 0) {
       params.append('sysparm_query', queryParts.join('^'));
