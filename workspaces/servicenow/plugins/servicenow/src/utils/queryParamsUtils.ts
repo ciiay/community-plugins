@@ -31,15 +31,15 @@ export function buildIncidentQueryParams({
   orderBy: IncidentTableFieldEnum;
   search?: string;
 }) {
-  return new URLSearchParams({
+  const params: Record<string, string> = {
     sysparm_query: `u_backstage_entity_id=${entityId}`,
     ...(order === 'asc'
       ? { sysparm_order_by: orderBy }
       : { sysparm_order_byDESC: orderBy }),
-    sysparm_limit: String(limit),
-    sysparm_offset: String(offset),
-    sysparm_fields:
-      'number,short_description,description,sys_created_on,priority,incident_state',
+    limit: String(limit),
+    offset: String(offset),
     ...(search ? { search } : {}),
-  });
+  };
+
+  return new URLSearchParams(params);
 }
