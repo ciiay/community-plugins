@@ -37,27 +37,22 @@ export interface IncidentEnumFilterProps {
   label: string;
   filterKey: string;
   dataMap: SourceMap;
+  value: SelectItem[];
+  onChange: (event: any, value: SelectItem[]) => void;
 }
 
 export const IncidentEnumFilter = ({
   label,
   filterKey,
   dataMap,
+  value,
+  onChange,
 }: IncidentEnumFilterProps) => {
-  const filter = useQueryArrayFilter(filterKey);
-
-  const items: SelectItem[] = Object.entries(dataMap).map(([key, value]) => ({
-    value: key,
-    label: value.label,
-    keyNumebr: Number(key),
-  }));
-
-  const handleChange = useCallback(
-    (_e: any, value: SelectItem[]) => {
-      const newSelection = value.map(v => v.value);
-      filter.set(newSelection);
-    },
-    [filter],
+  const items: SelectItem[] = Object.entries(dataMap).map(
+    ([key, itemValue]) => ({
+      value: key,
+      label: itemValue.label,
+    }),
   );
 
   return (
@@ -79,10 +74,10 @@ export const IncidentEnumFilter = ({
         disableCloseOnSelect
         aria-label={label}
         options={items}
-        isOptionEqualToValue={(option, value) => option.value === value.value}
+        isOptionEqualToValue={(option, val) => option.value === val.value}
         getOptionLabel={option => option.label}
-        onChange={handleChange}
-        renderOption={(renderProps, option, selectedOption) => {
+        onChange={onChange}
+        renderOption={(renderProps, option, { selected }) => {
           const { key, ...optionProps } = renderProps;
           const statusData =
             filterKey === 'priority'
@@ -95,17 +90,14 @@ export const IncidentEnumFilter = ({
                 icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                 checkedIcon={<CheckBoxIcon fontSize="small" />}
                 style={{ marginRight: 6, paddingLeft: 0 }}
-                checked={
-                  filter.current.some(c => c.value === option.value) ||
-                  selectedOption.selected
-                }
+                checked={selected}
               />
               {renderStatusLabel(statusData)}
             </li>
           );
         }}
         size="small"
-        value={filter.current}
+        value={value}
         popupIcon={
           <ExpandMoreIcon
             data-testid={`select-${label.toLowerCase().replace(/\s/g, '-')}`}
