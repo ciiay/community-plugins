@@ -37,9 +37,8 @@ export function buildIncidentQueryParams({
 }) {
   const params: Record<string, string> = {
     sysparm_query: `u_backstage_entity_id=${entityId}`,
-    ...(order === 'asc'
-      ? { sysparm_order_by: orderBy }
-      : { sysparm_order_byDESC: orderBy }),
+    order,
+    orderBy,
     limit: String(limit),
     offset: String(offset),
     ...(search ? { search } : {}),
