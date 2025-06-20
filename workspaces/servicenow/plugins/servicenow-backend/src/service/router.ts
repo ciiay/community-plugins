@@ -80,6 +80,8 @@ export async function createRouter(
       search,
       limit: limitStr,
       offset: offsetStr,
+      order,
+      orderBy,
     } = req.query;
 
     const userCredentials = await httpAuth.credentials(req, {
@@ -127,6 +129,14 @@ export async function createRouter(
     if (state) fetchOptions.state = String(state);
     if (priority) fetchOptions.priority = String(priority);
     if (search) fetchOptions.search = String(search);
+    if (order) {
+      if (order === 'asc' || order === 'desc') {
+        fetchOptions.order = order;
+      } else {
+        throw new InputError(`Invalid order parameter: ${order}`);
+      }
+    }
+    if (orderBy) fetchOptions.orderBy = String(orderBy);
 
     try {
       if (limitStr !== undefined) {
