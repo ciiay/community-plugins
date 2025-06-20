@@ -19,73 +19,34 @@ import { useSearchParams } from 'react-router-dom';
 import { SelectItem } from '@backstage/core-components';
 import { INCIDENT_STATE_MAP, PRIORITY_MAP } from '../utils/incidentUtils';
 
-const filterSearchParam = 'filter';
-
-const evaluateParams = (
-  newValues: (string | number)[],
-  newParams: URLSearchParams,
-  filterName: string,
-) => {
-  newValues.forEach(v => {
-    newParams.append(filterSearchParam, `${filterName}=${v}`);
-  });
-};
-
 export const useQueryArrayFilter = (filterName: string) => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const current = useMemo(() => {
-    return searchParams
-      .getAll(filterSearchParam)
-      .reduce((acc, keyValuePair) => {
-        const firstEqualIndex = keyValuePair.indexOf('=');
-        if (firstEqualIndex === -1) {
-          return acc;
-        }
-        const name = keyValuePair.substring(0, firstEqualIndex);
-        const value = keyValuePair.substring(firstEqualIndex + 1);
-        if (name === filterName) {
-          const map =
-            filterName === 'incident_state' ? INCIDENT_STATE_MAP : PRIORITY_MAP;
-          acc.push({ label: map[Number(value)]?.label, value });
-        }
-        return acc;
-      }, [] as SelectItem[]);
+    const values = searchParams.get(filterName)?.split(',') ?? [];
+    const map = filterName === 'state' ? INCIDENT_STATE_MAP : PRIORITY_MAP;
+
+    return values
+      .map(value => ({
+        label: map[Number(value)]?.label,
+        value,
+      }))
+      .filter(item => item.label);
   }, [filterName, searchParams]);
 
   const set = useCallback(
     (newValues: (string | number)[]) => {
       setSearchParams(
         params => {
-          const newParams = new URLSearchParams();
-
-          let added = false;
-          const add = () => {
-            if (added) return;
-            evaluateParams(newValues, newParams, filterName);
-            added = true;
-          };
-
-          // Try to keep the right position...
-          params.forEach((value, key) => {
-            if (
-              key === filterSearchParam &&
-              value.startsWith(`${filterName}=`)
-            ) {
-              add();
-            } else {
-              newParams.append(key, value);
-            }
-          });
-
-          // If not added yet, add it at the end
-          add();
-
+          const newParams = new URLSearchParams(params);
+          if (newValues.length > 0) {
+            newParams.set(filterName, newValues.join(','));
+          } else {
+            newParams.delete(filterName);
+          }
           return newParams;
         },
-        {
-          replace: true,
-        },
+        { replace: true },
       );
     },
     [filterName, setSearchParams],
@@ -94,21 +55,11 @@ export const useQueryArrayFilter = (filterName: string) => {
   const clear = useCallback(() => {
     setSearchParams(
       params => {
-        const newParams = new URLSearchParams();
-
-        params.forEach((value, key) => {
-          const isCurrentFilter =
-            key === filterSearchParam && value.startsWith(`${filterName}=`);
-          if (!isCurrentFilter) {
-            newParams.append(key, value);
-          }
-        });
-
+        const newParams = new URLSearchParams(params);
+        newParams.delete(filterName);
         return newParams;
       },
-      {
-        replace: true,
-      },
+      { replace: true },
     );
   }, [filterName, setSearchParams]);
 
