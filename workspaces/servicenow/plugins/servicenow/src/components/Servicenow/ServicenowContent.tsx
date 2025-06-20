@@ -97,6 +97,8 @@ export const ServicenowContent = () => {
           order,
           orderBy,
           search: debouncedSearch,
+          priority: searchParams.get('priority')?.split(',') ?? undefined,
+          state: searchParams.get('state')?.split(',') ?? undefined,
         });
 
         const data = await serviceNowApi.getIncidents(queryParams);
@@ -110,7 +112,15 @@ export const ServicenowContent = () => {
     }
 
     fetchIncidents();
-  }, [rowsPerPage, offset, order, orderBy, debouncedSearch, serviceNowApi]);
+  }, [
+    rowsPerPage,
+    offset,
+    order,
+    orderBy,
+    debouncedSearch,
+    serviceNowApi,
+    searchParams,
+  ]);
 
   const updateQueryParams = useCallback(
     (key: string, value: string | number) => {

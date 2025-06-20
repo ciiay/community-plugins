@@ -23,6 +23,8 @@ export function buildIncidentQueryParams({
   order,
   orderBy,
   search,
+  priority,
+  state,
 }: {
   entityId: string;
   limit: number;
@@ -30,6 +32,8 @@ export function buildIncidentQueryParams({
   order: 'asc' | 'desc';
   orderBy: IncidentTableFieldEnum;
   search?: string;
+  priority?: string[];
+  state?: string[];
 }) {
   const params: Record<string, string> = {
     sysparm_query: `u_backstage_entity_id=${entityId}`,
@@ -40,6 +44,14 @@ export function buildIncidentQueryParams({
     offset: String(offset),
     ...(search ? { search } : {}),
   };
+
+  if (priority?.length) {
+    params.priority = `IN${priority.join(',')}`;
+  }
+
+  if (state?.length) {
+    params.state = `IN${state.join(',')}`;
+  }
 
   return new URLSearchParams(params);
 }

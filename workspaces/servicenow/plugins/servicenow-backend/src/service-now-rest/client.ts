@@ -209,10 +209,9 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       queryParts.push(`caller_id=${id}^ORopened_by=${id}^ORassigned_to=${id}`);
     }
 
-    if (options.state)
-      queryParts.push(`state=${encodeURIComponent(options.state)}`);
-    if (options.priority)
-      queryParts.push(`priority=${encodeURIComponent(options.priority)}`);
+    if (options.state) queryParts.push(`state${options.state}`);
+    if (options.priority) queryParts.push(`priority${options.priority}`);
+
     if (options.search) {
       const searchTerm = encodeURIComponent(options.search);
       queryParts.push(
