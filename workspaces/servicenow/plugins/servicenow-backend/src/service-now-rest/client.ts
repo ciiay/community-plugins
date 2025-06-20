@@ -41,6 +41,8 @@ export type IncidentQueryParams = {
   limit?: number;
   offset?: number;
   userEmail: string;
+  order?: 'asc' | 'desc';
+  orderBy?: string;
 };
 
 export interface ServiceNowClient {
@@ -219,9 +221,18 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       );
     }
 
+    if (options.orderBy) {
+      if (options.order === 'desc') {
+        queryParts.push(`ORDERBYDESC${options.orderBy}`);
+      } else {
+        queryParts.push(`ORDERBY${options.orderBy}`);
+      }
+    }
+
     if (queryParts.length > 0) {
       params.append('sysparm_query', queryParts.join('^'));
     }
+
     if (options.limit !== undefined) {
       params.append('sysparm_limit', String(options.limit));
     }
