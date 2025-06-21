@@ -82,6 +82,7 @@ export async function createRouter(
       offset: offsetStr,
       order,
       orderBy,
+      entityId,
     } = req.query;
 
     const userCredentials = await httpAuth.credentials(req, {
@@ -122,8 +123,14 @@ export async function createRouter(
       );
     }
 
+    if (!entityId) {
+      res.json([]); // todo: should we throw an error here?
+      return;
+    }
+
     const fetchOptions: IncidentQueryParams = {
       userEmail: userEmail,
+      entityId: String(entityId),
     };
 
     if (state) fetchOptions.state = String(state);
