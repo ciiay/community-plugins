@@ -23,17 +23,10 @@ import {
 } from 'simple-oauth2';
 import axios from 'axios';
 import { ServiceNowSingleConfig } from '../config';
-import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
-
-// Types for ServiceNow incidents, but with cutted down fields
-export type IncidentPick = {
-  number: string;
-  short_description: string;
-  description: string;
-  sys_created_on: string;
-  priority: number;
-  incident_state: number;
-};
+import {
+  IncidentPick,
+  ServiceAnnotationFieldName,
+} from '@backstage-community/plugin-servicenow-common';
 
 export type IncidentQueryParams = {
   entityId: string;
