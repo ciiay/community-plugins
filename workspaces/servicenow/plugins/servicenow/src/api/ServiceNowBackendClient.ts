@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
+import { IncidentPick } from '@backstage-community/plugin-servicenow-common';
 import {
   createApiRef,
   DiscoveryApi,
   FetchApi,
   IdentityApi,
 } from '@backstage/core-plugin-api';
+import { IncidentsData } from '../types';
 
 export interface ServiceNowBackendAPI {
   getIncidents(queryParams: URLSearchParams): Promise<IncidentsData[]>;
@@ -55,6 +56,19 @@ export class ServiceNowBackendClient implements ServiceNowBackendAPI {
   }
 
   async getIncidents(queryParams: URLSearchParams): Promise<IncidentsData[]> {
-    return this.fetchFromServiceNow<IncidentsData[]>('/incidents', queryParams);
+    return incidentsPickToIncidentsData(
+      await this.fetchFromServiceNow<IncidentPick[]>('/incidents', queryParams),
+    );
   }
+}
+
+function incidentsPickToIncidentsData(data: IncidentPick[]): IncidentsData[] {
+  return data.map(item => ({
+    number: item.number,
+    shortDescription: item.short_description,
+    description: item.description,
+    sysCreatedOn: item.sys_created_on,
+    priority: item.priority,
+    incidentState: item.incident_state,
+  }));
 }

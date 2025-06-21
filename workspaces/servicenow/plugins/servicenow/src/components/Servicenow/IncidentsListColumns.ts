@@ -15,12 +15,15 @@
  */
 import { TableColumn } from '@backstage/core-components';
 
-import { IncidentTableFieldEnum } from '../../types';
-import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
+import { IncidentsData, IncidentTableFieldEnum } from '../../types';
 
 export const IncidentsListColumns: TableColumn<IncidentsData>[] = [
   {
     id: 'incidentNumber',
+    // todo: incident "number" this is not Request ID... And "number" is not always unique...
+    // Ideally it should be unique, but it is not guaranteed. It should be if table shcema is correct.
+    // In the dev instance I found it is not unique...
+    // sys_id is unique, but it is not displayed in the UI. And we didn't use it in the both backend and frontend.
     title: 'Request ID',
     field: IncidentTableFieldEnum.Number,
     type: 'string',
