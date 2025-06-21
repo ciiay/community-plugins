@@ -29,12 +29,10 @@ import Router from 'express-promise-router';
 import { ServiceNowSingleConfig } from '../config';
 import {
   DefaultServiceNowClient,
-  IncidentPick,
   IncidentQueryParams,
 } from '../service-now-rest/client';
 import type { CatalogApi } from '@backstage/catalog-client';
 import { Entity } from '@backstage/catalog-model';
-import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
 
 export interface RouterOptions {
   logger: LoggerService;
@@ -167,7 +165,7 @@ export async function createRouter(
       }
 
       const incidents = await client.fetchIncidents(fetchOptions);
-      res.json(incidentsPickToIncidentsData(incidents));
+      res.json(incidents);
     } catch (error) {
       if (error instanceof InputError) {
         throw error;
@@ -180,15 +178,4 @@ export async function createRouter(
   });
 
   return router;
-}
-
-function incidentsPickToIncidentsData(data: IncidentPick[]): IncidentsData[] {
-  return data.map(item => ({
-    number: item.number,
-    shortDescription: item.short_description,
-    description: item.description,
-    sysCreatedOn: item.sys_created_on,
-    priority: item.priority,
-    incidentState: item.incident_state,
-  }));
 }
