@@ -22,3 +22,5 @@ export type IncidentsData = {
   priority: number;
   incidentState: number;
 };
+
+export const ServiceAnnotationFieldName = 'u_backstage_entity_id';
