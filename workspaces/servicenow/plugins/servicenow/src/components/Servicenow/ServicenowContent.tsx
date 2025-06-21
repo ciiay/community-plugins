@@ -36,15 +36,16 @@ import { IncidentsFilter } from './IncidentsFilter';
 import { IncidentsListColumns } from './IncidentsListColumns';
 import { IncidentsTableBody } from './IncidentsTableBody';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
-import { IncidentTableFieldEnum, SortingOrderEnum } from '../../types';
+import {
+  IncidentsData,
+  IncidentTableFieldEnum,
+  SortingOrderEnum,
+} from '../../types';
 import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useQueryState } from '../../hooks/useQueryState';
 import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
-import {
-  IncidentsData,
-  ServiceAnnotationFieldName,
-} from '@backstage-community/plugin-servicenow-common';
+import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
 
 export const ServicenowContent = () => {
   const { entity } = useEntity();

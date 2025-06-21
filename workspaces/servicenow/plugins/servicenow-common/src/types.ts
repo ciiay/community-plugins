@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-export type IncidentsData = {
+/**
+ * Incident common type - represents a ServiceNow incident, but with limited set of the fields.
+ * So, it is not meant to be a complete representation of a ServiceNow incident.
+ * This is used to ensure that the incident data is consistent across different parts of the plugin.
+ * It should be used in the frontend to display incident data in a consistent way.
+ * It is used in the backend to fetch incident data from ServiceNow.
+ * @public
+ */
+export type IncidentPick = {
   number: string;
-  shortDescription: string;
+  short_description: string;
   description: string;
-  sysCreatedOn: string;
+  sys_created_on: string;
   priority: number;
-  incidentState: number;
+  incident_state: number;
 };
 
 export const ServiceAnnotationFieldName = 'u_backstage_entity_id';
