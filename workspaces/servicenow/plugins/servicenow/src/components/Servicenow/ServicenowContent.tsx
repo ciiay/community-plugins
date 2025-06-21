@@ -24,7 +24,10 @@ import {
 import { useApi } from '@backstage/core-plugin-api';
 import { useSearchParams } from 'react-router-dom';
 
-import { CatalogFilterLayout } from '@backstage/plugin-catalog-react';
+import {
+  CatalogFilterLayout,
+  useEntity,
+} from '@backstage/plugin-catalog-react';
 import { Table } from '@backstage/core-components';
 import Box from '@mui/material/Box';
 import TablePagination from '@mui/material/TablePagination';
@@ -38,9 +41,13 @@ import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useQueryState } from '../../hooks/useQueryState';
 import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
-import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
+import {
+  IncidentsData,
+  ServiceAnnotationFieldName,
+} from '@backstage-community/plugin-servicenow-common';
 
 export const ServicenowContent = () => {
+  const { entity } = useEntity();
   const serviceNowApi = useApi(serviceNowApiRef);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -91,7 +98,8 @@ export const ServicenowContent = () => {
       setError(null);
       try {
         const queryParams = buildIncidentQueryParams({
-          entityId: 'my-service-id',
+          entityId:
+            entity.metadata.annotations?.[ServiceAnnotationFieldName] ?? '',
           limit: rowsPerPage,
           offset,
           order,
@@ -120,6 +128,7 @@ export const ServicenowContent = () => {
     debouncedSearch,
     serviceNowApi,
     searchParams,
+    entity.metadata.annotations,
   ]);
 
   const updateQueryParams = useCallback(

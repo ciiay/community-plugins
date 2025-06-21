@@ -23,6 +23,7 @@ import {
 } from 'simple-oauth2';
 import axios from 'axios';
 import { ServiceNowSingleConfig } from '../config';
+import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
 
 // Types for ServiceNow incidents, but with cutted down fields
 export type IncidentPick = {
@@ -35,12 +36,13 @@ export type IncidentPick = {
 };
 
 export type IncidentQueryParams = {
+  entityId: string;
+  userEmail: string;
   state?: string;
   priority?: string;
   search?: string;
   limit?: number;
   offset?: number;
-  userEmail: string;
   order?: 'asc' | 'desc';
   orderBy?: string;
 };
@@ -221,6 +223,10 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       );
     }
 
+    if (options.entityId) {
+      queryParts.push(`${ServiceAnnotationFieldName}=${options.entityId}`);
+    }
+
     if (options.orderBy) {
       if (options.order === 'desc') {
         queryParts.push(`ORDERBYDESC${options.orderBy}`);
@@ -302,6 +308,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     });
     const users = response.data?.result;
     if (users && users.length > 0) return users[0].sys_id;
-    return null;
+
+    throw new Error(`User with email ${email} not found in ServiceNow.`);
   }
 }
