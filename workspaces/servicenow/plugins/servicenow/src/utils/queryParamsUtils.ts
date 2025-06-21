@@ -36,7 +36,7 @@ export function buildIncidentQueryParams({
   state?: string[];
 }) {
   const params: Record<string, string> = {
-    sysparm_query: `u_backstage_entity_id=${entityId}`,
+    entityId,
     order,
     orderBy,
     limit: String(limit),

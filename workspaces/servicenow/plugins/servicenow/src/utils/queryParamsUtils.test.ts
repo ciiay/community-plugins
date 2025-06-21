@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
 import { IncidentTableFieldEnum } from '../types';
 import { buildIncidentQueryParams } from './queryParamsUtils';
 
@@ -32,7 +33,7 @@ describe('buildIncidentQueryParams', () => {
     });
 
     expect(params.get('sysparm_query')).toBe(
-      'u_backstage_entity_id=service-id-123',
+      `${ServiceAnnotationFieldName}=service-id-123`,
     );
     expect(params.get('sysparm_order_by')).toBe('priority');
     expect(params.has('sysparm_order_byDESC')).toBe(false);
