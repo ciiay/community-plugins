@@ -31,4 +31,21 @@ export type IncidentPick = {
   incident_state: number;
 };
 
+export const IncidentFieldEnum = {
+  Number: 'number',
+  ShortDescription: 'short_description',
+  Description: 'description',
+  Created: 'sys_created_on',
+  Priority: 'priority',
+  IncidentState: 'incident_state',
+} as const;
+
+export const SortingOrderEnum = {
+  Asc: 'asc',
+  Desc: 'desc',
+} as const;
+export type SortingOrderEnumType = typeof SortingOrderEnum;
+
+export type Order = SortingOrderEnumType[keyof SortingOrderEnumType];
+
 export const ServiceAnnotationFieldName = 'u_backstage_entity_id';

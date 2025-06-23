@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { useCallback } from 'react';
 import { SelectItem } from '@backstage/core-components';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
@@ -24,7 +23,6 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InputLabel from '@mui/material/InputLabel';
 import TextField from '@mui/material/TextField';
-import { useQueryArrayFilter } from '../../hooks/useQueryArrayFilter';
 import {
   INCIDENT_STATE_MAP,
   PRIORITY_MAP,

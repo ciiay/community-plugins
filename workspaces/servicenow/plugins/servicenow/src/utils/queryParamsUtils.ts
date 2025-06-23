@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IncidentTableFieldEnum } from '../types';
+import { IncidentTableField } from '../types';
 
 export function buildIncidentQueryParams({
   entityId,
@@ -30,7 +30,7 @@ export function buildIncidentQueryParams({
   limit: number;
   offset: number;
   order: 'asc' | 'desc';
-  orderBy: IncidentTableFieldEnum;
+  orderBy: IncidentTableField;
   search?: string;
   priority?: string[];
   state?: string[];

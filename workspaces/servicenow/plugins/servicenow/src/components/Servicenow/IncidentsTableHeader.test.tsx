@@ -17,14 +17,15 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
 import { IncidentsListColumns } from './IncidentsListColumns';
-import { IncidentTableFieldEnum, Order } from '../../types';
+import { IncidentTableFieldEnum, IncidentTableField } from '../../types';
+import type { Order } from '@backstage-community/plugin-servicenow-common';
 
 describe('IncidentsTableHeader', () => {
   const mockOnRequestSort = jest.fn();
 
   const renderComponent = (
     order: Order,
-    orderBy: IncidentTableFieldEnum | undefined,
+    orderBy: IncidentTableField | undefined,
   ) => {
     return render(
       <table>
