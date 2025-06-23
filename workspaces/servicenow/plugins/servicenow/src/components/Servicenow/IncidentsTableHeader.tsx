@@ -21,14 +21,15 @@ import TableRow from '@mui/material/TableRow';
 import TableSortLabel from '@mui/material/TableSortLabel';
 
 import { IncidentsListColumns } from './IncidentsListColumns';
-import { IncidentTableFieldEnum, Order } from '../../types';
+import type { Order } from '@backstage-community/plugin-servicenow-common';
+import { IncidentTableField } from '../../types';
 
 type IncidentsTableHeaderProps = {
   order: Order;
-  orderBy: IncidentTableFieldEnum | undefined;
+  orderBy: IncidentTableField | undefined;
   onRequestSort: (
     event: MouseEvent<unknown>,
-    property: IncidentTableFieldEnum,
+    property: IncidentTableField,
   ) => void;
 };
 
@@ -38,7 +39,7 @@ export const IncidentsTableHeader = ({
   onRequestSort,
 }: IncidentsTableHeaderProps) => {
   const createSortHandler =
-    (property: IncidentTableFieldEnum) => (event: MouseEvent<unknown>) => {
+    (property: IncidentTableField) => (event: MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 
@@ -64,7 +65,7 @@ export const IncidentsTableHeader = ({
               onClick={
                 column.sorting === false
                   ? undefined
-                  : createSortHandler(column.field as IncidentTableFieldEnum)
+                  : createSortHandler(column.field as IncidentTableField)
               }
               disabled={column.sorting === false}
             >
