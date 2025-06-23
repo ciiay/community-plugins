@@ -27,7 +27,7 @@ import {
   getIncidentStateValue,
   getPriorityValue,
 } from '../../utils/incidentUtils';
-import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
+import type { IncidentsData } from '../../types';
 
 const useStyles = makeStyles(() => ({
   tableCellStyle: {

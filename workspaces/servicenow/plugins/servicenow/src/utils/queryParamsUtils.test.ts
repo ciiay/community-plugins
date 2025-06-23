@@ -15,8 +15,8 @@
  */
 
 import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
-import { IncidentTableFieldEnum } from '../types';
 import { buildIncidentQueryParams } from './queryParamsUtils';
+import { IncidentTableFieldEnum } from '../types';
 
 describe('buildIncidentQueryParams', () => {
   const baseParams = {

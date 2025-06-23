@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { IncidentFieldEnum } from '@backstage-community/plugin-servicenow-common';
+
 export type IncidentsData = {
   number: string;
   shortDescription: string;
@@ -23,17 +25,18 @@ export type IncidentsData = {
   incidentState: number;
 };
 
-export enum IncidentTableFieldEnum {
-  Number = 'number',
-  ShortDescription = 'short_description',
-  Created = 'sys_created_on',
-  Priority = 'priority',
-  IncidentState = 'incident_state',
-}
+export type IncidentTableFieldEnumType = Omit<
+  typeof IncidentFieldEnum,
+  'Description'
+>;
 
-export enum SortingOrderEnum {
-  Asc = 'asc',
-  Desc = 'desc',
-}
+export const IncidentTableFieldEnum: IncidentTableFieldEnumType = {
+  Created: IncidentFieldEnum.Created,
+  IncidentState: IncidentFieldEnum.IncidentState,
+  Number: IncidentFieldEnum.Number,
+  Priority: IncidentFieldEnum.Priority,
+  ShortDescription: IncidentFieldEnum.ShortDescription,
+};
 
-export type Order = 'asc' | 'desc';
+export type IncidentTableField =
+  (typeof IncidentTableFieldEnum)[keyof typeof IncidentTableFieldEnum];

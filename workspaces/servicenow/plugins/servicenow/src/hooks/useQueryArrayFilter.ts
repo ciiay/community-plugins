@@ -16,7 +16,6 @@
 
 import { useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SelectItem } from '@backstage/core-components';
 import { INCIDENT_STATE_MAP, PRIORITY_MAP } from '../utils/incidentUtils';
 
 export const useQueryArrayFilter = (filterName: string) => {

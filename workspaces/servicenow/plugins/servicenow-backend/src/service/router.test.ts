@@ -128,12 +128,12 @@ describe('createRouter', () => {
       mockFetchIncidents.mockResolvedValue(mockIncidentsData);
 
       const queryParams = {
+        entityId: 'mock-entity-id',
         limit: 10,
         offset: 5,
-        state: 'Open',
-        assignedTo: 'user1',
-        priority: '1',
-        shortDescription: 'network issue',
+        state: 'IN1',
+        priority: 'IN1',
+        search: 'network issue',
       };
 
       const response = await request(app)
@@ -167,7 +167,7 @@ describe('createRouter', () => {
           userEmail: mockUserEmail,
           state: queryParams.state,
           priority: queryParams.priority,
-          shortDescription: queryParams.shortDescription,
+          search: queryParams.search,
           limit: queryParams.limit,
           offset: queryParams.offset,
         }),
@@ -204,7 +204,7 @@ describe('createRouter', () => {
         new Error('UserInfoService internal failure'),
       );
       const response = await request(app)
-        .get('/incidents')
+        .get('/incidents?entityId=mock-entity-id&state=1')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(500);
       expect(response.body.error.message).toBe(
@@ -220,7 +220,7 @@ describe('createRouter', () => {
         ownershipEntityRefs: [],
       } as any);
       const response = await request(app)
-        .get('/incidents')
+        .get('/incidents?entityId=mock-entity-for-failure-test')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(400);
       expect(response.body.error.name).toBe('InputError');
@@ -245,7 +245,7 @@ describe('createRouter', () => {
         token: undefined,
       } as any);
       const response = await request(app)
-        .get('/incidents')
+        .get('/incidents?entityId=mock-entity-for-failure-test')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(401); // Or appropriate error based on router logic
       expect(response.body.error.name).toBe('AuthenticationError');
@@ -270,7 +270,7 @@ describe('createRouter', () => {
       });
       mockCatalogApi.getEntityByRef = jest.fn().mockResolvedValue(undefined);
       const response = await request(app)
-        .get('/incidents')
+        .get('/incidents?entityId=mock-entity-for-failure-test')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(404);
       expect(response.body.error.name).toBe('NotFoundError');
@@ -299,7 +299,7 @@ describe('createRouter', () => {
           new NotFoundError('Catalog entity explicitly not found'),
         );
       const response = await request(app)
-        .get('/incidents')
+        .get('/incidents?entityId=mock-entity-for-failure-test')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(404);
       expect(response.body.error.name).toBe('NotFoundError');
@@ -327,6 +327,7 @@ describe('createRouter', () => {
         .mockRejectedValue(new Error('CatalogApi generic failure'));
       const response = await request(app)
         .get('/incidents')
+        .query({ entityId: 'mock-entity-for-test' })
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(500);
       expect(response.body.error.message).toBe('CatalogApi generic failure');
@@ -357,6 +358,7 @@ describe('createRouter', () => {
         .mockResolvedValue(userEntityWithoutEmail);
       const response = await request(app)
         .get('/incidents')
+        .query({ entityId: 'mock-entity-for-test' })
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(404);
       expect(response.body.error.name).toBe('NotFoundError');
@@ -390,6 +392,7 @@ describe('createRouter', () => {
         .mockResolvedValue(userEntityWithUndefinedEmail);
       const response = await request(app)
         .get('/incidents')
+        .query({ entityId: 'mock-entity-for-test' })
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(404);
       expect(response.body.error.name).toBe('NotFoundError');
@@ -427,6 +430,7 @@ describe('createRouter', () => {
 
       const response = await request(app)
         .get('/incidents')
+        .query({ entityId: 'mock-entity-for-test' })
         .set('Authorization', mockAuthHeader);
 
       expect(response.status).toBe(404);
@@ -458,6 +462,7 @@ describe('createRouter', () => {
       );
       const response = await request(app)
         .get('/incidents')
+        .query({ entityId: 'mock-entity-for-test' })
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(500);
       expect(response.body.error.message).toBe(
@@ -482,12 +487,12 @@ describe('createRouter', () => {
         .fn()
         .mockResolvedValue(mockUserEntity);
       const response = await request(app)
-        .get('/incidents?limit=abc')
+        .get('/incidents?entityId=mock-entity-id&limit=abc')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(400);
       expect(response.body.error.name).toBe('InputError');
       expect(response.body.error.message).toBe(
-        'Invalid limit parameter: abc. Must be a non-negative number.',
+        'limit must be a non-negative integer.',
       );
     });
 
@@ -508,12 +513,12 @@ describe('createRouter', () => {
         .fn()
         .mockResolvedValue(mockUserEntity);
       const response = await request(app)
-        .get('/incidents?limit=-1')
+        .get('/incidents?entityId=mock-entity-id&limit=-1')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(400);
       expect(response.body.error.name).toBe('InputError');
       expect(response.body.error.message).toBe(
-        'Invalid limit parameter: -1. Must be a non-negative number.',
+        'limit must be a non-negative integer.',
       );
     });
 
@@ -534,12 +539,12 @@ describe('createRouter', () => {
         .fn()
         .mockResolvedValue(mockUserEntity);
       const response = await request(app)
-        .get('/incidents?offset=xyz')
+        .get('/incidents?entityId=mock-entity-id&offset=xyz')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(400);
       expect(response.body.error.name).toBe('InputError');
       expect(response.body.error.message).toBe(
-        'Invalid offset parameter: xyz. Must be a non-negative number.',
+        'offset must be a non-negative integer.',
       );
     });
 
@@ -560,13 +565,73 @@ describe('createRouter', () => {
         .fn()
         .mockResolvedValue(mockUserEntity);
       const response = await request(app)
-        .get('/incidents?offset=-5')
+        .get('/incidents?entityId=mock-entity-id&offset=-5')
         .set('Authorization', mockAuthHeader);
       expect(response.status).toBe(400);
       expect(response.body.error.name).toBe('InputError');
       expect(response.body.error.message).toBe(
-        'Invalid offset parameter: -5. Must be a non-negative number.',
+        'offset must be a non-negative integer.',
       );
+    });
+
+    it('should return 400 if state parameter does not use IN prefix', async () => {
+      mockHttpAuthService.credentials.mockResolvedValue(mockCredentials);
+      mockUserInfoService.getUserInfo.mockResolvedValue({
+        userEntityRef: mockUserEntityRef,
+        ownershipEntityRefs: [],
+      });
+      mockAuthService.getOwnServiceCredentials.mockResolvedValue({
+        $$type: '@backstage/BackstageCredentials',
+        principal: { type: 'service', subject: 'servicenow-backend' },
+      });
+      mockAuthService.getPluginRequestToken.mockResolvedValue({
+        token: mockBareToken,
+      });
+      mockCatalogApi.getEntityByRef = jest
+        .fn()
+        .mockResolvedValue(mockUserEntity);
+
+      const response = await request(app)
+        .get('/incidents')
+        .query({ entityId: 'mock-entity-id', state: '1' })
+        .set('Authorization', mockAuthHeader);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.name).toBe('InputError');
+      expect(response.body.error.message).toBe(
+        "Query parameter 'state' must use the 'IN' prefix format (e.g., 'INvalue1,value2' or 'INvalue').",
+      );
+      expect(mockFetchIncidents).not.toHaveBeenCalled();
+    });
+
+    it('should return 400 if priority parameter does not use IN prefix', async () => {
+      mockHttpAuthService.credentials.mockResolvedValue(mockCredentials);
+      mockUserInfoService.getUserInfo.mockResolvedValue({
+        userEntityRef: mockUserEntityRef,
+        ownershipEntityRefs: [],
+      });
+      mockAuthService.getOwnServiceCredentials.mockResolvedValue({
+        $$type: '@backstage/BackstageCredentials',
+        principal: { type: 'service', subject: 'servicenow-backend' },
+      });
+      mockAuthService.getPluginRequestToken.mockResolvedValue({
+        token: mockBareToken,
+      });
+      mockCatalogApi.getEntityByRef = jest
+        .fn()
+        .mockResolvedValue(mockUserEntity);
+
+      const response = await request(app)
+        .get('/incidents')
+        .query({ entityId: 'mock-entity-id', priority: '1' })
+        .set('Authorization', mockAuthHeader);
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.name).toBe('InputError');
+      expect(response.body.error.message).toBe(
+        "Query parameter 'priority' must use the 'IN' prefix format (e.g., 'INvalue1,value2' or 'INvalue').",
+      );
+      expect(mockFetchIncidents).not.toHaveBeenCalled();
     });
   });
 });

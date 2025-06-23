@@ -18,7 +18,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { IncidentsTableRow } from './IncidentsTableRow';
-import { IncidentsData } from '@backstage-community/plugin-servicenow-common';
+import type { IncidentsData } from '../../types';
 
 jest.mock('@mui/styles', () => ({
   makeStyles: () => () => ({}),

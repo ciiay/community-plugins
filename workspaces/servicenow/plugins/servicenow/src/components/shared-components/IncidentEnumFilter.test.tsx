@@ -60,6 +60,8 @@ describe('IncidentEnumFilter', () => {
           1: { label: 'Critical' },
           2: { label: 'High' },
         }}
+        value={[]}
+        onChange={() => {}}
       />,
     );
 
@@ -77,6 +79,8 @@ describe('IncidentEnumFilter', () => {
           1: { label: 'New' },
           2: { label: 'In Progress' },
         }}
+        value={[]}
+        onChange={() => {}}
       />,
     );
 
@@ -100,6 +104,8 @@ describe('IncidentEnumFilter', () => {
           1: { label: 'Critical' },
           2: { label: 'High' },
         }}
+        value={[]}
+        onChange={() => {}}
       />,
     );
 
@@ -123,6 +129,8 @@ describe('IncidentEnumFilter', () => {
           1: { label: 'Critical' },
           2: { label: 'High' },
         }}
+        value={[{ label: 'High', value: '2' }]}
+        onChange={() => {}}
       />,
     );
 
