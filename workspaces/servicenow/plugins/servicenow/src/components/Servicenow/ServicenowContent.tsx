@@ -37,10 +37,14 @@ import { IncidentsListColumns } from './IncidentsListColumns';
 import { IncidentsTableBody } from './IncidentsTableBody';
 import { IncidentsTableHeader } from './IncidentsTableHeader';
 import {
-  IncidentsData,
   IncidentTableFieldEnum,
-  SortingOrderEnum,
+  type IncidentsData,
+  type IncidentTableField,
 } from '../../types';
+import {
+  Order,
+  SortingOrderEnum,
+} from '@backstage-community/plugin-servicenow-common';
 import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useQueryState } from '../../hooks/useQueryState';
@@ -55,13 +59,10 @@ export const ServicenowContent = () => {
   const [input, setInput] = useState(() => searchParams.get('search') ?? '');
   const debouncedSearch = useDebouncedValue(input, 300);
 
-  const [order, setOrder] = useQueryState<SortingOrderEnum>(
-    'order',
-    SortingOrderEnum.Asc,
-  );
-  const [orderBy, setOrderBy] = useState<IncidentTableFieldEnum>(
+  const [order, setOrder] = useQueryState<Order>('order', SortingOrderEnum.Asc);
+  const [orderBy, setOrderBy] = useState<IncidentTableField>(
     () =>
-      (searchParams.get('orderBy') as IncidentTableFieldEnum) ??
+      (searchParams.get('orderBy') as IncidentTableField) ??
       IncidentTableFieldEnum.Number,
   );
 
@@ -158,7 +159,7 @@ export const ServicenowContent = () => {
 
   const handleRequestSort = (
     _event: MouseEvent<unknown>,
-    property: IncidentTableFieldEnum,
+    property: IncidentTableField,
   ) => {
     const isAsc = orderBy === property && order === SortingOrderEnum.Asc;
     setOrder(isAsc ? SortingOrderEnum.Desc : SortingOrderEnum.Asc);

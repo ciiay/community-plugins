@@ -18,6 +18,7 @@ import {
   NotFoundError,
   AuthenticationError,
 } from '@backstage/errors';
+import { validateIncidentQueryParams } from './validator';
 import {
   AuthService,
   HttpAuthService,
@@ -27,10 +28,7 @@ import {
 import express from 'express';
 import Router from 'express-promise-router';
 import { ServiceNowSingleConfig } from '../config';
-import {
-  DefaultServiceNowClient,
-  IncidentQueryParams,
-} from '../service-now-rest/client';
+import { DefaultServiceNowClient } from '../service-now-rest/client';
 import type { CatalogApi } from '@backstage/catalog-client';
 import { Entity } from '@backstage/catalog-model';
 
@@ -72,17 +70,6 @@ export async function createRouter(
   });
 
   router.get('/incidents', async (req, res) => {
-    const {
-      state,
-      priority,
-      search,
-      limit: limitStr,
-      offset: offsetStr,
-      order,
-      orderBy,
-      entityId,
-    } = req.query;
-
     const userCredentials = await httpAuth.credentials(req, {
       allow: ['user'],
     });
@@ -114,57 +101,19 @@ export async function createRouter(
       );
     }
 
-    const userEmail = (userEntity.spec?.profile as any)?.email;
-    if (!userEmail) {
+    const loggedInUserEmail = (userEntity.spec?.profile as any)?.email;
+    if (!loggedInUserEmail) {
       throw new NotFoundError(
         `Email not found for user ${userInfo.userEntityRef}`,
       );
     }
 
-    if (!entityId) {
-      res.json([]); // todo: should we throw an error here?
-      return;
-    }
-
-    const fetchOptions: IncidentQueryParams = {
-      userEmail: userEmail,
-      entityId: String(entityId),
-    };
-
-    if (state) fetchOptions.state = String(state);
-    if (priority) fetchOptions.priority = String(priority);
-    if (search) fetchOptions.search = String(search);
-    if (order) {
-      if (order === 'asc' || order === 'desc') {
-        fetchOptions.order = order;
-      } else {
-        throw new InputError(`Invalid order parameter: ${order}`);
-      }
-    }
-    if (orderBy) fetchOptions.orderBy = String(orderBy);
-
+    const validatedParams = validateIncidentQueryParams(
+      req.query,
+      loggedInUserEmail,
+    );
     try {
-      if (limitStr !== undefined) {
-        const limit = parseInt(String(limitStr), 10);
-        if (isNaN(limit) || limit < 0) {
-          throw new InputError(
-            `Invalid limit parameter: ${limitStr}. Must be a non-negative number.`,
-          );
-        }
-        fetchOptions.limit = limit;
-      }
-
-      if (offsetStr !== undefined) {
-        const offset = parseInt(String(offsetStr), 10);
-        if (isNaN(offset) || offset < 0) {
-          throw new InputError(
-            `Invalid offset parameter: ${offsetStr}. Must be a non-negative number.`,
-          );
-        }
-        fetchOptions.offset = offset;
-      }
-
-      const incidents = await client.fetchIncidents(fetchOptions);
+      const incidents = await client.fetchIncidents(validatedParams);
       res.json(incidents);
     } catch (error) {
       if (error instanceof InputError) {
