@@ -14,12 +14,25 @@
  * limitations under the License.
  */
 
-import { screen } from '@testing-library/react';
-import { renderInTestApp } from '@backstage/test-utils';
-import userEvent from '@testing-library/user-event';
-
-import { ServicenowContent } from './ServicenowContent';
+import { EntityProvider } from '@backstage/plugin-catalog-react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderInTestApp, TestApiProvider } from '@backstage/test-utils';
+import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
+import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
 import { mockIncidents } from '../../mocks/mockData';
+import userEvent from '@testing-library/user-event';
+import { ServicenowContent } from './ServicenowContent';
+
+const mockEntity = {
+  apiVersion: 'backstage.io/v1alpha1',
+  kind: 'Component',
+  metadata: {
+    name: 'mock-component',
+    annotations: {
+      [ServiceAnnotationFieldName]: 'service-id-123',
+    },
+  },
+};
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -44,8 +57,33 @@ jest.mock('../../hooks/useQueryState', () => ({
 }));
 
 describe('ServicenowContent', () => {
+  const mockServiceNowApi = {
+    getIncidents: jest.fn(),
+  };
+
+  beforeEach(() => {
+    mockServiceNowApi.getIncidents.mockReset();
+    mockServiceNowApi.getIncidents.mockResolvedValue(mockIncidents);
+  });
+
   it('renders the table with incident rows', async () => {
-    await renderInTestApp(<ServicenowContent />);
+    await renderInTestApp(
+      <TestApiProvider apis={[[serviceNowApiRef, mockServiceNowApi]]}>
+        <EntityProvider entity={mockEntity}>
+          <ServicenowContent />
+        </EntityProvider>
+      </TestApiProvider>,
+    );
+
+    await waitFor(() => {
+      expect(mockServiceNowApi.getIncidents).toHaveBeenCalled();
+    });
+
+    expect(mockServiceNowApi.getIncidents).toHaveBeenCalledTimes(1);
+
+    expect(
+      await screen.findByText(mockIncidents[0].number),
+    ).toBeInTheDocument();
 
     expect(
       screen.getByText(`ServiceNow tickets (${mockIncidents.length})`),
@@ -58,7 +96,20 @@ describe('ServicenowContent', () => {
   });
 
   it('displays pagination dropdown', async () => {
-    await renderInTestApp(<ServicenowContent />);
+    await renderInTestApp(
+      <TestApiProvider apis={[[serviceNowApiRef, mockServiceNowApi]]}>
+        <EntityProvider entity={mockEntity}>
+          <ServicenowContent />
+        </EntityProvider>
+      </TestApiProvider>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(`ServiceNow tickets (${mockIncidents.length})`),
+      ).toBeInTheDocument();
+    });
+
     const dropdowns = screen.getAllByRole('combobox');
     const paginationDropdown = dropdowns.find(el =>
       el.textContent?.includes('5 rows'),
@@ -66,19 +117,48 @@ describe('ServicenowContent', () => {
     expect(paginationDropdown).toBeInTheDocument();
   });
 
-  it.skip('shows empty content placeholder when no incidents are available', async () => {
-    // update this test when backend is ready
-    jest.mock('../../mocks/mockData', () => ({
-      mockIncidents: [],
-    }));
+  it('shows empty content placeholder when no incidents are available', async () => {
+    mockServiceNowApi.getIncidents.mockResolvedValue([]);
 
-    await renderInTestApp(<ServicenowContent />);
-    expect(screen.getByTestId('no-incidents-found')).toBeInTheDocument();
+    await renderInTestApp(
+      <TestApiProvider apis={[[serviceNowApiRef, mockServiceNowApi]]}>
+        <EntityProvider entity={mockEntity}>
+          <ServicenowContent />
+        </EntityProvider>
+      </TestApiProvider>,
+    );
+
+    await waitFor(() => {
+      expect(mockServiceNowApi.getIncidents).toHaveBeenCalled();
+    });
+    expect(mockServiceNowApi.getIncidents).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('no-incidents-found')).toBeInTheDocument();
+    });
   });
 
   it('handles search input updates', async () => {
     const user = userEvent.setup();
-    await renderInTestApp(<ServicenowContent />);
+    await renderInTestApp(
+      <TestApiProvider apis={[[serviceNowApiRef, mockServiceNowApi]]}>
+        <EntityProvider entity={mockEntity}>
+          <ServicenowContent />
+        </EntityProvider>
+      </TestApiProvider>,
+    );
+
+    await waitFor(() => {
+      expect(mockServiceNowApi.getIncidents).toHaveBeenCalled();
+    });
+
+    expect(
+      await screen.findByText(mockIncidents[0].number),
+    ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
 
     const input = screen.getByPlaceholderText('Search');
     await user.type(input, 'INC001');
