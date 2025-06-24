@@ -32,16 +32,12 @@ describe('buildIncidentQueryParams', () => {
       order: 'asc',
     });
 
-    expect(params.get('sysparm_query')).toBe(
-      `${ServiceAnnotationFieldName}=service-id-123`,
-    );
-    expect(params.get('sysparm_order_by')).toBe('priority');
-    expect(params.has('sysparm_order_byDESC')).toBe(false);
-    expect(params.get('sysparm_limit')).toBe('10');
-    expect(params.get('sysparm_offset')).toBe('20');
-    expect(params.get('sysparm_fields')).toBe(
-      'number,short_description,description,sys_created_on,priority,incident_state',
-    );
+    expect(params.get('entityId')).toBe(`${baseParams.entityId}`);
+    expect(params.get('orderBy')).toBe('priority');
+    expect(params.get('order')).toBe('asc');
+    expect(params.get('limit')).toBe('10');
+    expect(params.get('offset')).toBe('20');
+    expect(params.has('search')).toBe(false);
   });
 
   it('builds params for descending order', () => {
@@ -50,8 +46,8 @@ describe('buildIncidentQueryParams', () => {
       order: 'desc',
     });
 
-    expect(params.get('sysparm_order_byDESC')).toBe('priority');
-    expect(params.has('sysparm_order_by')).toBe(false);
+    expect(params.get('orderBy')).toBe('priority');
+    expect(params.get('order')).toBe('desc');
   });
 
   it('includes search when provided', () => {
@@ -62,6 +58,7 @@ describe('buildIncidentQueryParams', () => {
     });
 
     expect(params.get('search')).toBe('network');
+    expect(params.get('entityId')).toBe(`${baseParams.entityId}`);
   });
 
   it('omits search when not provided', () => {
@@ -70,6 +67,7 @@ describe('buildIncidentQueryParams', () => {
       order: 'asc',
     });
 
+    expect(params.get('entityId')).toBe(`${baseParams.entityId}`);
     expect(params.has('search')).toBe(false);
   });
 

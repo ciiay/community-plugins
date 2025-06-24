@@ -41,7 +41,6 @@ export function buildIncidentQueryParams({
     orderBy,
     limit: String(limit),
     offset: String(offset),
-    ...(search ? { search } : {}),
   };
 
   if (priority?.length) {
@@ -50,6 +49,10 @@ export function buildIncidentQueryParams({
 
   if (state?.length) {
     params.state = `IN${state.join(',')}`;
+  }
+
+  if (search) {
+    params.search = search;
   }
 
   return new URLSearchParams(params);

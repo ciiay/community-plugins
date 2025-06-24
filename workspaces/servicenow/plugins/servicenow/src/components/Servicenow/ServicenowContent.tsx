@@ -75,6 +75,10 @@ export const ServicenowContent = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const entityId = entity.metadata.annotations?.[ServiceAnnotationFieldName];
+  const priorityFromParams = searchParams.get('priority');
+  const stateFromParams = searchParams.get('state');
+
   useEffect(() => {
     setSearchParams(
       prev => {
@@ -98,17 +102,23 @@ export const ServicenowContent = () => {
     async function fetchIncidents() {
       setLoading(true);
       setError(null);
+
+      if (!entityId) {
+        setIncidents([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         const queryParams = buildIncidentQueryParams({
-          entityId:
-            entity.metadata.annotations?.[ServiceAnnotationFieldName] ?? '',
+          entityId: entityId ?? '',
           limit: rowsPerPage,
           offset,
           order,
           orderBy,
           search: debouncedSearch,
-          priority: searchParams.get('priority')?.split(',') ?? undefined,
-          state: searchParams.get('state')?.split(',') ?? undefined,
+          priority: priorityFromParams?.split(',') ?? undefined,
+          state: stateFromParams?.split(',') ?? undefined,
         });
 
         const data = await serviceNowApi.getIncidents(queryParams);
@@ -129,8 +139,9 @@ export const ServicenowContent = () => {
     orderBy,
     debouncedSearch,
     serviceNowApi,
-    searchParams,
-    entity.metadata.annotations,
+    entityId,
+    priorityFromParams,
+    stateFromParams,
   ]);
 
   const updateQueryParams = useCallback(
