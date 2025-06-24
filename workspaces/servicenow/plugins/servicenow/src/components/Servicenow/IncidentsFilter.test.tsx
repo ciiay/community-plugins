@@ -15,6 +15,7 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { IncidentsFilter } from './IncidentsFilter';
 
 jest.mock('../shared-components/IncidentEnumFilter', () => ({
@@ -25,7 +26,11 @@ jest.mock('../shared-components/IncidentEnumFilter', () => ({
 
 describe('IncidentsFilter', () => {
   it('renders both State and Priority filters', () => {
-    render(<IncidentsFilter />);
+    render(
+      <MemoryRouter>
+        <IncidentsFilter />
+      </MemoryRouter>,
+    );
 
     const filters = screen.getAllByTestId('incident-enum-filter');
     expect(filters).toHaveLength(2);
@@ -35,7 +40,11 @@ describe('IncidentsFilter', () => {
   });
 
   it('renders with a vertical layout (column)', () => {
-    const { container } = render(<IncidentsFilter />);
+    const { container } = render(
+      <MemoryRouter>
+        <IncidentsFilter />
+      </MemoryRouter>,
+    );
     const box = container.querySelector('div');
     expect(box).toHaveStyle('flex-direction: column');
   });
