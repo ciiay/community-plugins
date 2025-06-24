@@ -96,6 +96,7 @@ describe('IncidentEnumFilter', () => {
   });
 
   it('calls filter.set on selection', async () => {
+    const mockOnChange = jest.fn();
     render(
       <IncidentEnumFilter
         label="Priority"
@@ -105,7 +106,7 @@ describe('IncidentEnumFilter', () => {
           2: { label: 'High' },
         }}
         value={[]}
-        onChange={() => {}}
+        onChange={mockOnChange}
       />,
     );
 
@@ -115,7 +116,12 @@ describe('IncidentEnumFilter', () => {
     const item = await screen.findByText('Critical');
     await userEvent.click(item);
 
-    expect(mockSet).toHaveBeenCalledWith(['1']);
+    expect(mockOnChange).toHaveBeenCalledWith(
+      expect.anything(),
+      [{ label: 'Critical', value: '1' }],
+      'selectOption',
+      { option: { label: 'Critical', value: '1' } },
+    );
   });
 
   it('marks checkbox as checked if item is in current filter', async () => {

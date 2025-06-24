@@ -55,7 +55,7 @@ export const mockIncidents = [
     incidentState: 6,
   },
   {
-    number: 'INC0000056',
+    number: 'INC0000055',
     shortDescription: 'Issue with Microsoft Office active directory',
     description:
       'I am unable to connect to the email server. It appears to be down.',
