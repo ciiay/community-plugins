@@ -40,6 +40,5 @@ export interface Config {
     instanceUrl: string;
     basicAuth?: BasicAuthConfig;
     oauth?: OAuthConfig;
-    userFilterField?: string;
   };
 }
