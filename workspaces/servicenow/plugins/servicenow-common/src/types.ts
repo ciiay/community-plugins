@@ -49,4 +49,4 @@ export type SortingOrderEnumType = typeof SortingOrderEnum;
 
 export type Order = SortingOrderEnumType[keyof SortingOrderEnumType];
 
-export const ServiceAnnotationFieldName = 'u_backstage_entity_id';
+export const ServiceAnnotationFieldName = 'servicenow.com/entity-id';
