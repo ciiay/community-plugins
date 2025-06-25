@@ -240,7 +240,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     }
     params.append(
       'sysparm_fields',
-      'number,short_description,description,sys_created_on,priority,incident_state',
+      'sys_id,number,short_description,description,sys_created_on,priority,incident_state',
     );
 
     const requestUrl = `${
