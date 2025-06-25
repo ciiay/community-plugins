@@ -27,14 +27,14 @@ import {
 } from '@backstage/backend-plugin-api';
 import express from 'express';
 import Router from 'express-promise-router';
-import { ServiceNowSingleConfig } from '../config';
 import { DefaultServiceNowClient } from '../service-now-rest/client';
 import type { CatalogApi } from '@backstage/catalog-client';
 import { Entity } from '@backstage/catalog-model';
+import { ServiceNowConfig } from '../../config';
 
 export interface RouterOptions {
   logger: LoggerService;
-  servicenowConfig: ServiceNowSingleConfig;
+  servicenowConfig: ServiceNowConfig;
   userInfoService: UserInfoService;
   httpAuth: HttpAuthService;
   auth: AuthService;
@@ -54,7 +54,7 @@ export async function createRouter(
   } = options;
 
   logger.info(
-    `Creating router for ServiceNow with instance URL: ${servicenowConfig.instanceUrl}`,
+    `Creating router for ServiceNow with instance URL: ${servicenowConfig.servicenow?.instanceUrl}`,
   );
 
   const client = new DefaultServiceNowClient(
