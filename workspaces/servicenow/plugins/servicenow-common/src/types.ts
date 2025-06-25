@@ -23,6 +23,7 @@
  * @public
  */
 export type IncidentPick = {
+  sys_id: string;
   number: string;
   short_description: string;
   description: string;
