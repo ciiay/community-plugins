@@ -32,7 +32,7 @@ import {
   CatalogServiceMock,
   catalogServiceMock,
 } from '@backstage/plugin-catalog-node/testUtils';
-import { ServiceNowSingleConfig } from '../config';
+import { ServiceNowConfig } from '../../config';
 
 const mockFetchIncidents = jest.fn();
 jest.mock('../service-now-rest/client', () => {
@@ -49,7 +49,7 @@ describe('createRouter', () => {
   let mockHttpAuthService: jest.Mocked<HttpAuthService>;
   let mockUserInfoService: jest.Mocked<UserInfoService>;
   let mockCatalogApi: CatalogServiceMock;
-  let mockServiceNowConfig: ServiceNowSingleConfig;
+  let mockServiceNowConfig: ServiceNowConfig;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -60,12 +60,14 @@ describe('createRouter', () => {
     mockCatalogApi = catalogServiceMock();
 
     mockServiceNowConfig = {
-      instanceUrl: 'https://mock-instance.service-now.com',
-      oauth: {
-        grantType: 'client_credentials',
-        clientId: 'mock-client-id',
-        clientSecret: 'mock-client-secret',
-        tokenUrl: 'https://mock-instance.service-now.com/oauth_token.do',
+      servicenow: {
+        instanceUrl: 'https://mock-instance.service-now.com',
+        oauth: {
+          grantType: 'client_credentials',
+          clientId: 'mock-client-id',
+          clientSecret: 'mock-client-secret',
+          tokenUrl: 'https://mock-instance.service-now.com/oauth_token.do',
+        },
       },
     };
 

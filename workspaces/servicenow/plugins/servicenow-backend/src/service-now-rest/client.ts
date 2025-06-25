@@ -22,11 +22,11 @@ import {
   AccessToken,
 } from 'simple-oauth2';
 import axios from 'axios';
-import { ServiceNowSingleConfig } from '../config';
 import {
   IncidentPick,
   ServiceAnnotationFieldName,
 } from '@backstage-community/plugin-servicenow-common';
+import { OAuthConfig, ServiceNowConfig } from '../../config';
 
 export type IncidentQueryParams = {
   entityId: string;
@@ -46,16 +46,23 @@ export interface ServiceNowClient {
 
 export class DefaultServiceNowClient implements ServiceNowClient {
   private readonly instanceUrl: string;
-  private readonly config: ServiceNowSingleConfig;
+  private readonly config: ServiceNowConfig;
   private readonly logger: LoggerService;
   private oauthClient?: ClientCredentials | ResourceOwnerPassword;
 
-  constructor(config: ServiceNowSingleConfig, logger: LoggerService) {
+  constructor(config: ServiceNowConfig, logger: LoggerService) {
     this.config = config;
     this.logger = logger;
-    this.instanceUrl = config.instanceUrl.replace(/\/$/, '');
 
-    if (!config.oauth && !config.basicAuth) {
+    if (!config.servicenow?.instanceUrl) {
+      logger.error('ServiceNow instance url is missing. Please configure it.');
+      throw new Error(
+        'ServiceNow instance url is missing. Please configure it.',
+      );
+    }
+    this.instanceUrl = config.servicenow?.instanceUrl.replace(/\/$/, '');
+
+    if (!config.servicenow?.oauth && !config.servicenow?.basicAuth) {
       logger.error(
         'ServiceNow authentication configuration is missing. Please configure either OAuth or Basic Auth.',
       );
@@ -64,22 +71,19 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       );
     }
 
-    if (config.oauth) {
-      this.setupOAuthClient(config);
+    if (config.servicenow?.oauth) {
+      this.setupOAuthClient(config.servicenow.oauth);
     }
 
-    if (config.basicAuth) {
+    if (config.servicenow?.basicAuth) {
       logger.warn(
         'Basic authentication is configured for ServiceNow. This is not recommended for production environments.',
       );
     }
   }
 
-  private setupOAuthClient(config: ServiceNowSingleConfig) {
-    if (!config.oauth) return;
-
-    const determinedTokenUrl =
-      config.oauth.tokenUrl ?? `${this.instanceUrl}/oauth_token.do`;
+  private setupOAuthClient(oauth: OAuthConfig) {
+    const determinedTokenUrl = `${this.instanceUrl}/oauth_token.do`;
 
     let tokenHost: string;
     let tokenPath: string;
@@ -96,8 +100,8 @@ export class DefaultServiceNowClient implements ServiceNowClient {
 
     const oauthModuleOptions: ModuleOptions = {
       client: {
-        id: config.oauth.clientId,
-        secret: config.oauth.clientSecret,
+        id: oauth.clientId,
+        secret: oauth.clientSecret,
       },
       auth: {
         tokenHost: tokenHost,
@@ -108,10 +112,10 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       },
     };
 
-    if (config.oauth.grantType === 'client_credentials') {
+    if (oauth.grantType === 'client_credentials') {
       this.oauthClient = new ClientCredentials(oauthModuleOptions);
-    } else if (config.oauth.grantType === 'password') {
-      if (!config.oauth.username || !config.oauth.password) {
+    } else if (oauth.grantType === 'password') {
+      if (!oauth.username || !oauth.password) {
         this.logger.error(
           "Username and/or password missing for 'password' grant type in ServiceNow OAuth config.",
         );
@@ -121,30 +125,33 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       }
       this.oauthClient = new ResourceOwnerPassword(oauthModuleOptions);
     } else {
-      const grantType = (config.oauth as any).grantType;
+      const grantType = (oauth as any).grantType;
       this.logger.error(`Unsupported OAuth grantType: ${grantType}`);
       throw new Error(`Unsupported OAuth grantType: ${grantType}`);
     }
   }
 
   private async getAuthHeaders(): Promise<{ Authorization: string }> {
-    if (this.config.basicAuth) {
-      const { username, password } = this.config.basicAuth;
+    if (this.config.servicenow?.basicAuth) {
+      const { username, password } = this.config.servicenow.basicAuth;
       const encodedCredentials = Buffer.from(
         `${username}:${password}`,
       ).toString('base64');
       return { Authorization: `Basic ${encodedCredentials}` };
     }
 
-    if (this.config.oauth && this.oauthClient) {
+    if (this.config.servicenow?.oauth && this.oauthClient) {
       let accessToken: AccessToken;
       try {
-        if (this.config.oauth.grantType === 'client_credentials') {
+        if (this.config.servicenow.oauth.grantType === 'client_credentials') {
           accessToken = await (this.oauthClient as ClientCredentials).getToken(
             {},
           );
-        } else if (this.config.oauth.grantType === 'password') {
-          if (!this.config.oauth.username || !this.config.oauth.password) {
+        } else if (this.config.servicenow.oauth.grantType === 'password') {
+          if (
+            !this.config.servicenow.oauth.username ||
+            !this.config.servicenow.oauth.password
+          ) {
             throw new Error(
               "Username or password missing for 'password' grant type during token acquisition.",
             );
@@ -152,13 +159,13 @@ export class DefaultServiceNowClient implements ServiceNowClient {
           accessToken = await (
             this.oauthClient as ResourceOwnerPassword
           ).getToken({
-            username: this.config.oauth.username,
-            password: this.config.oauth.password,
+            username: this.config.servicenow.oauth.username,
+            password: this.config.servicenow.oauth.password,
           });
         } else {
           throw new Error(
             `Unsupported grantType in getAuthHeaders: ${
-              (this.config.oauth as any).grantType
+              (this.config.servicenow.oauth as any).grantType
             }`,
           );
         }

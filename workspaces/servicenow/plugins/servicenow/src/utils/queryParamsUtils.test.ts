@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
 import { buildIncidentQueryParams } from './queryParamsUtils';
 import { IncidentTableFieldEnum } from '../types';
 

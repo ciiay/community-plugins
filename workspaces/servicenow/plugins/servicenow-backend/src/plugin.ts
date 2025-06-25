@@ -18,8 +18,9 @@ import {
   createBackendPlugin,
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './service';
-import { readServiceNowConfig, ServiceNowSingleConfig } from './config';
+import { readServiceNowConfig } from './config';
 import { CatalogClient } from '@backstage/catalog-client';
+import { ServiceNowConfig } from '../config';
 
 /**
  * servicenowPlugin backend plugin
@@ -48,7 +49,7 @@ export const servicenowPlugin = createBackendPlugin({
         auth,
         discovery,
       }) {
-        const servicenowConfig: ServiceNowSingleConfig | undefined =
+        const servicenowConfig: ServiceNowConfig | undefined =
           readServiceNowConfig(config);
 
         if (!servicenowConfig) {

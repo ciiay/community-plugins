@@ -14,31 +14,43 @@
  * limitations under the License.
  */
 
-export type OAuthConfig =
-  | {
-      grantType: 'client_credentials';
-      clientId: string;
-      clientSecret: string;
-      tokenUrl?: string;
-    }
-  | {
-      grantType: 'password';
-      clientId: string;
-      clientSecret: string;
-      username: string;
-      password: string;
-      tokenUrl?: string;
-    };
+type BaseOAuthConfig = {
+  clientId: string;
+  clientSecret: string;
+  tokenUrl?: string;
+};
+
+type ClientCredentialsGrant = BaseOAuthConfig & {
+  grantType: 'client_credentials';
+};
+
+type PasswordGrant = BaseOAuthConfig & {
+  grantType: 'password';
+  username: string;
+  password: string;
+};
+
+export type OAuthConfig = ClientCredentialsGrant | PasswordGrant;
 
 export type BasicAuthConfig = {
   username: string;
   password: string;
 };
 
-export interface Config {
+export interface ServiceNowConfig {
   servicenow?: {
+    /**
+     * The instance URL for ServiceNow.
+     * @visibility backend
+     */
     instanceUrl: string;
+    /**
+     * @visibility secret
+     */
     basicAuth?: BasicAuthConfig;
+    /**
+     * @visibility secret
+     */
     oauth?: OAuthConfig;
   };
 }
