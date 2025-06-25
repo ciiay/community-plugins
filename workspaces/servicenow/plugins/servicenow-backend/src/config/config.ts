@@ -53,7 +53,6 @@ export interface ServiceNowSingleConfig {
   instanceUrl: string;
   oauth?: ServiceNowOAuthConfig;
   basicAuth?: ServiceNowBasicAuthConfig;
-  userFilterField?: string;
 }
 
 /**
@@ -165,12 +164,9 @@ export function readServiceNowConfig(
     };
   }
 
-  const userFilterField = serviceNowConfig.getOptionalString('userFilterField');
-
   return {
     instanceUrl,
     oauth,
     basicAuth,
-    userFilterField,
   };
 }
