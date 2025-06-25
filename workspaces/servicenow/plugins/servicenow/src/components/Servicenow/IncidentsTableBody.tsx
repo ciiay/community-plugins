@@ -30,7 +30,7 @@ export const IncidentsTableBody = ({ rows }: { rows: IncidentsData[] }) => {
     return (
       <TableBody data-testid="incidents">
         {rows.map(row => (
-          <IncidentsTableRow key={row.number} data={row} />
+          <IncidentsTableRow key={row.sysId} data={row} />
         ))}
       </TableBody>
     );

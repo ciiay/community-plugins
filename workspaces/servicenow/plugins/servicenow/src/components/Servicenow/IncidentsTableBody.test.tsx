@@ -21,6 +21,7 @@ import { IncidentsTableBody } from './IncidentsTableBody';
 
 const mockRows: IncidentsData[] = [
   {
+    sysId: '46e8219ba9fe1981013806b6e04fed06',
     number: 'INC0000001',
     shortDescription: 'Test incident',
     description: 'This is a test incident',

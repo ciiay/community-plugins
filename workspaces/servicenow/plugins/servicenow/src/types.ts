@@ -17,6 +17,7 @@
 import { IncidentFieldEnum } from '@backstage-community/plugin-servicenow-common';
 
 export type IncidentsData = {
+  sysId: string;
   number: string;
   shortDescription: string;
   description: string;

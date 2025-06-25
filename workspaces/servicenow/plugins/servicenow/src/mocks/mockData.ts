@@ -13,65 +13,68 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const mockIncidents = [
+
+import { IncidentsData } from '../types';
+
+export const mockIncidents: IncidentsData[] = [
   {
+    sysId: '46e8219ba9fe1981013806b6e04fed06',
     number: 'INC0000060',
     shortDescription: 'Unable to connect to email',
     description:
       'I am unable to connect to the email server. It appears to be down.',
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 1,
-    severity: 3,
     incidentState: 1,
   },
   {
+    sysId: '46e8219ba9fe1981013806b6e04fed07',
     number: 'INC0000059',
     shortDescription: 'Issue with Microsoft Office active directory',
     description:
       'I am unable to connect to the email server. It appears to be down.',
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 3,
-    severity: 2,
     incidentState: 2,
   },
   {
+    sysId: '46e8219ba9fe1981013806b6e04fed08',
     number: 'INC0000058',
     shortDescription: 'Unable to connect to email',
     description:
       'I am unable to connect to the email server. It appears to be down.',
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 2,
-    severity: 3,
     incidentState: 3,
   },
   {
+    sysId: '46e8219ba9fe1981013806b6e04fed09',
     number: 'INC0000057',
     shortDescription: 'Issue with Microsoft Office active directory',
     description:
       'I am unable to connect to the email server. It appears to be down.',
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 4,
-    severity: 2,
     incidentState: 6,
   },
   {
+    sysId: '46e8219ba9fe1981013806b6e04fed10',
     number: 'INC0000055',
     shortDescription: 'Issue with Microsoft Office active directory',
     description:
       'I am unable to connect to the email server. It appears to be down.',
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 5,
-    severity: 2,
     incidentState: 8,
   },
   {
+    sysId: '46e8219ba9fe1981013806b6e04fed11',
     number: 'INC0000056',
     shortDescription: 'Issue with Microsoft Office active directory',
     description:
       'I am unable to connect to the email server. It appears to be down.',
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 4,
-    severity: 2,
     incidentState: 7,
   },
 ];
