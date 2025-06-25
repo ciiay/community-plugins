@@ -46,20 +46,20 @@ describe('IncidentsTableHeader', () => {
 
   it('renders all column headers with titles', () => {
     renderComponent('asc', undefined);
-    IncidentsListColumns.forEach(column => {
+    IncidentsListColumns.filter(c => c.title).forEach(column => {
       expect(screen.getByText(column.title as string)).toBeInTheDocument();
     });
   });
 
   it('activates sort only for the selected column', () => {
     renderComponent('desc', IncidentTableFieldEnum.Number);
-    const activeSortLabel = screen.getByText('Request ID').closest('th');
+    const activeSortLabel = screen.getByText('Incident Number').closest('th');
     expect(activeSortLabel).toHaveAttribute('aria-sort', 'descending');
   });
 
   it('calls onRequestSort when a sortable column is clicked', () => {
     renderComponent('asc', IncidentTableFieldEnum.Number);
-    const header = screen.getByText('Request ID');
+    const header = screen.getByText('Incident Number');
     fireEvent.click(header);
     expect(mockOnRequestSort).toHaveBeenCalledWith(
       expect.any(Object),
