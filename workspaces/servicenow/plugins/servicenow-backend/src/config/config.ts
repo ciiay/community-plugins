@@ -16,44 +16,11 @@
 
 import { Config } from '@backstage/config';
 import { InputError } from '@backstage/errors';
-
-/**
- * Defines the OAuth configuration for ServiceNow.
- * @public
- */
-export type ServiceNowOAuthConfig =
-  | {
-      grantType: 'client_credentials';
-      clientId: string;
-      clientSecret: string;
-      tokenUrl?: string;
-    }
-  | {
-      grantType: 'password';
-      clientId: string;
-      clientSecret: string;
-      username: string;
-      password: string;
-      tokenUrl?: string;
-    };
-
-/**
- * @public
- */
-export type ServiceNowBasicAuthConfig = {
-  username: string;
-  password: string;
-};
-
-/**
- * Defines the configuration for a single ServiceNow instance.
- * @public
- */
-export interface ServiceNowSingleConfig {
-  instanceUrl: string;
-  oauth?: ServiceNowOAuthConfig;
-  basicAuth?: ServiceNowBasicAuthConfig;
-}
+import type {
+  BasicAuthConfig,
+  OAuthConfig,
+  ServiceNowConfig,
+} from '../../config';
 
 /**
  * Reads the ServiceNow configuration from the provided Config object.
@@ -65,7 +32,7 @@ export interface ServiceNowSingleConfig {
  */
 export function readServiceNowConfig(
   config: Config,
-): ServiceNowSingleConfig | undefined {
+): ServiceNowConfig | undefined {
   const serviceNowConfig = config.getOptionalConfig('servicenow');
   if (!serviceNowConfig) {
     return undefined;
@@ -78,10 +45,10 @@ export function readServiceNowConfig(
     );
   }
 
-  let oauth: ServiceNowOAuthConfig | undefined = undefined;
+  let oauth: OAuthConfig | undefined = undefined;
   const oauthConfig = serviceNowConfig.getOptionalConfig('oauth');
 
-  let basicAuth: ServiceNowBasicAuthConfig | undefined = undefined;
+  let basicAuth: BasicAuthConfig | undefined = undefined;
   const basicAuthConfig = serviceNowConfig.getOptionalConfig('basicAuth');
 
   if (oauthConfig && basicAuthConfig) {
@@ -165,8 +132,10 @@ export function readServiceNowConfig(
   }
 
   return {
-    instanceUrl,
-    oauth,
-    basicAuth,
+    servicenow: {
+      instanceUrl,
+      oauth,
+      basicAuth,
+    },
   };
 }
