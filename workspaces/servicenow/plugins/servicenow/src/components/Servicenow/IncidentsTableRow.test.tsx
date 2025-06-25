@@ -35,6 +35,7 @@ jest.mock('../../utils/stringUtils', () => ({
 
 describe('IncidentsTableRow', () => {
   const mockData: IncidentsData = {
+    sysId: '46e8219ba9fe1981013806b6e04fed06',
     number: 'INC0000001',
     shortDescription: 'Network issue in HQ',
     description:
