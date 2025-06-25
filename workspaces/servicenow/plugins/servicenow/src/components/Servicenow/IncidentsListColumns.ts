@@ -20,7 +20,7 @@ import { IncidentsData, IncidentTableFieldEnum } from '../../types';
 export const IncidentsListColumns: TableColumn<IncidentsData>[] = [
   {
     id: 'incidentNumber',
-    title: 'Request ID',
+    title: 'Incident Number',
     field: IncidentTableFieldEnum.Number,
     type: 'string',
   },
