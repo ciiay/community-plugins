@@ -224,7 +224,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     }
 
     if (options.entityId) {
-      queryParts.push(`${ServiceAnnotationFieldName}=${options.entityId}`);
+      queryParts.push(`u_backstage_entity_id=${options.entityId}`);
     }
 
     if (options.orderBy) {
