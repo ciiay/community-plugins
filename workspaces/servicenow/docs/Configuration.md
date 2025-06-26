@@ -26,7 +26,7 @@ servicenow:
 
 The plugin supports two OAuth grant types: `password` and `client_credentials`.
 
-#### Password Grant Type
+#### Grant Type "password"
 
 This grant type requires your admin username, password, client ID, and client secret.
 
@@ -40,17 +40,7 @@ This grant type requires your admin username, password, client ID, and client se
       - **Client Type:** Integration as a User (in the dropdown)
     - Copy the **Client ID** and submit the form.
 
-2.  **Enable the password grant type system property:**
-
-    - Navigate to `https://<your-instance-url>/sys_properties_list.do`.
-    - Search for the property `glide.oauth.password_grant.enabled`. If it doesn't exist, create it.
-    - Set the following values:
-      - **Name:** `glide.oauth.password_grant.enabled`
-      - **Type:** `true | false`
-      - **Value:** `true`
-    - Submit the form.
-
-3.  **Update your `app-config.yaml`:**
+2.  **Update your `app-config.yaml`:**
 
     ```yaml
     servicenow:
@@ -63,28 +53,62 @@ This grant type requires your admin username, password, client ID, and client se
         password: <your-admin-password>
     ```
 
-#### Client Credentials Grant Type
+#### Grant Type "client_credentials"
 
-This grant type allows authentication using only a client ID and client secret, without an admin password in the configuration.
+This grant type allows authentication using only a client ID and client secret, without an admin password in the configuration. Read more https://www.servicenow.com/community/developer-blog/up-your-oauth2-0-game-inbound-client-credentials-with-washington/ba-p/2816891
+
+2.  **Enable the necessary system properties:**
+
+    Create new property `glide.oauth.inbound.client.credential.grant_type.enabled`. Navigate to `https://<your-instance-url>/sys_properties_list.do`,
+    and search `glide.oauth.inbound.client.credential.grant_type.enabled`. If it is not present, click "New" button.
+    In the "System Property" form provide:
+
+    - Name: glide.oauth.inbound.client.credential.grant_type.enabled
+    - Type: "true|false"
+    - Value: "true"
+
+    Click "Save".
 
 1.  **Create an OAuth configuration in ServiceNow:**
 
     - In the ServiceNow UI, navigate to **All** -> **Application registry**.
     - Click **New** and select **Create an OAuth API endpoint for external clients**.
     - Fill in the form:
+
       - **Name:** `oauth` (or any desired name)
       - **Client Secret:** `mysecret` (or any desired value)
       - **Client Type:** Integration as a Service (in the dropdown)
-    - Copy the **Client ID** and submit the form.
-    - Assign an admin user to the OAuth configuration.
+      - Assign an admin user to the OAuth configuration. But by default UI hide this option, so you need to use "Form builder" to put this option onto UI.
 
-2.  **Enable the necessary system properties:**
+      Notice: if you don't want to use "Form builder" you can use corresponding Glide script:
 
-    - Enable `glide.oauth.provider.enabled` and `glide.oauth.client_credentials.grant.enabled`.
-    - Navigate to `https://<your-instance-url>/sys_properties_list.do`.
-    - Ensure both properties are present and set to `true`. If they don't exist, create them.
+      ```js
+      var clientId = 'your-created-oauth-configuration-client-id';
+      var userName = 'admin'; // your admin username
 
-3.  **Update your `app-config.yaml`:**
+      // Find OAuth client by client_id
+      var clientGR = new GlideRecord('<your-client-id>');
+      clientGR.addQuery('client_id', clientId);
+      clientGR.query();
+
+      if (clientGR.next()) {
+        var userGR = new GlideRecord('sys_user');
+        userGR.addQuery('user_name', userName);
+        userGR.query();
+
+        if (userGR.next()) {
+          clientGR.setValue('user', userGR.sys_id);
+          clientGR.update();
+          gs.info('✅ Integration user was set up: ' + userGR.user_name);
+        } else {
+          gs.error('❌ User with user_name was not found: ' + userName);
+        }
+      } else {
+        gs.error('❌ OAuth client with client_id was not found: ' + clientId);
+      }
+      ```
+
+1.  **Update your `app-config.yaml`:**
 
     ```yaml
     servicenow:
