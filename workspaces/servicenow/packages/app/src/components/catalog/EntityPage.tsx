@@ -330,6 +330,9 @@ const userPage = (
         </Grid>
       </Grid>
     </EntityLayout.Route>
+    <EntityLayout.Route path="/servicenow" title="My ServiceNow tickets">
+      <ServicenowPage />
+    </EntityLayout.Route>
   </EntityLayout>
 );
 

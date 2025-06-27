@@ -71,5 +71,6 @@ function incidentsPickToIncidentsData(data: IncidentPick[]): IncidentsData[] {
     sysCreatedOn: item.sys_created_on,
     priority: item.priority,
     incidentState: item.incident_state,
+    url: item.url,
   }));
 }

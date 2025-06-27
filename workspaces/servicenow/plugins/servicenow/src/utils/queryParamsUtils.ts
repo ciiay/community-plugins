@@ -17,6 +17,7 @@
 import { IncidentTableField } from '../types';
 
 export function buildIncidentQueryParams({
+  userEmail,
   entityId,
   limit,
   offset,
@@ -26,7 +27,6 @@ export function buildIncidentQueryParams({
   priority,
   state,
 }: {
-  entityId: string;
   limit: number;
   offset: number;
   order: 'asc' | 'desc';
@@ -34,9 +34,10 @@ export function buildIncidentQueryParams({
   search?: string;
   priority?: string[];
   state?: string[];
+  userEmail?: string;
+  entityId?: string;
 }) {
   const params: Record<string, string> = {
-    entityId,
     order,
     orderBy,
     limit: String(limit),
@@ -53,6 +54,14 @@ export function buildIncidentQueryParams({
 
   if (search) {
     params.search = search;
+  }
+
+  if (entityId) {
+    params.entityId = entityId;
+  }
+
+  if (userEmail) {
+    params.userEmail = userEmail;
   }
 
   return new URLSearchParams(params);
