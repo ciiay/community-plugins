@@ -44,12 +44,13 @@ import {
 import {
   Order,
   SortingOrderEnum,
+  ServiceAnnotationFieldName,
 } from '@backstage-community/plugin-servicenow-common';
 import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useQueryState } from '../../hooks/useQueryState';
 import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
-import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
+import useUserEmail from '../../hooks/useUserEmail';
 
 export const ServicenowContent = () => {
   const { entity } = useEntity();
@@ -78,6 +79,7 @@ export const ServicenowContent = () => {
   const entityId = entity.metadata.annotations?.[ServiceAnnotationFieldName];
   const priorityFromParams = searchParams.get('priority');
   const stateFromParams = searchParams.get('state');
+  const userEmail = useUserEmail();
 
   useEffect(() => {
     setSearchParams(
@@ -92,18 +94,32 @@ export const ServicenowContent = () => {
         params.set('offset', String(offset));
         params.set('order', order);
         params.set('orderBy', orderBy);
+
+        if (userEmail) {
+          params.set('userEmail', userEmail);
+        } else {
+          params.delete('userEmail');
+        }
         return params;
       },
       { replace: true },
     );
-  }, [debouncedSearch, rowsPerPage, offset, order, orderBy, setSearchParams]);
+  }, [
+    debouncedSearch,
+    rowsPerPage,
+    offset,
+    order,
+    orderBy,
+    setSearchParams,
+    userEmail,
+  ]);
 
   useEffect(() => {
     async function fetchIncidents() {
       setLoading(true);
       setError(null);
 
-      if (!entityId) {
+      if (!userEmail && !entityId) {
         setIncidents([]);
         setLoading(false);
         return;
@@ -111,7 +127,6 @@ export const ServicenowContent = () => {
 
       try {
         const queryParams = buildIncidentQueryParams({
-          entityId: entityId ?? '',
           limit: rowsPerPage,
           offset,
           order,
@@ -119,6 +134,8 @@ export const ServicenowContent = () => {
           search: debouncedSearch,
           priority: priorityFromParams?.split(',') ?? undefined,
           state: stateFromParams?.split(',') ?? undefined,
+          ...(userEmail ? { userEmail } : {}),
+          ...(entityId && !userEmail ? { entityId } : {}),
         });
 
         const data = await serviceNowApi.getIncidents(queryParams);
@@ -142,6 +159,7 @@ export const ServicenowContent = () => {
     entityId,
     priorityFromParams,
     stateFromParams,
+    userEmail,
   ]);
 
   const updateQueryParams = useCallback(

@@ -24,6 +24,7 @@ export type IncidentsData = {
   sysCreatedOn: string;
   priority: number;
   incidentState: number;
+  url: string;
 };
 
 export type IncidentTableFieldEnumType = Omit<
@@ -37,6 +38,7 @@ export const IncidentTableFieldEnum: IncidentTableFieldEnumType = {
   Number: IncidentFieldEnum.Number,
   Priority: IncidentFieldEnum.Priority,
   ShortDescription: IncidentFieldEnum.ShortDescription,
+  Url: IncidentFieldEnum.Url,
 };
 
 export type IncidentTableField =

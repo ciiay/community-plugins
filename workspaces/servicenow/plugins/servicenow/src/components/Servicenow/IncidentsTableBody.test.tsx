@@ -28,6 +28,7 @@ const mockRows: IncidentsData[] = [
     priority: 2,
     incidentState: 2,
     sysCreatedOn: '2022-01-01',
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed06',
   },
 ];
 
