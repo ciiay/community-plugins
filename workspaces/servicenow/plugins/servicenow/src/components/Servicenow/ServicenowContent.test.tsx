@@ -46,7 +46,7 @@ const mockIdentityApi = {
   getProfile: () => ({ email: 'mock@example.com' }),
   getIdToken: async () => 'token',
   getCredentials: async () => ({}),
-  signOut: async () => { },
+  signOut: async () => {},
 };
 
 jest.mock('react-router-dom', () => {
@@ -83,11 +83,13 @@ describe('ServicenowContent', () => {
 
   it('renders the table with incident rows', async () => {
     await renderInTestApp(
-      <TestApiProvider apis={[
-        [serviceNowApiRef, mockServiceNowApi],
-        [catalogApiRef, mockCatalogApi],
-        [identityApiRef, mockIdentityApi],
-      ]}>
+      <TestApiProvider
+        apis={[
+          [serviceNowApiRef, mockServiceNowApi],
+          [catalogApiRef, mockCatalogApi],
+          [identityApiRef, mockIdentityApi],
+        ]}
+      >
         <EntityProvider entity={mockEntity}>
           <ServicenowContent />
         </EntityProvider>
@@ -116,11 +118,13 @@ describe('ServicenowContent', () => {
 
   it('displays pagination dropdown', async () => {
     await renderInTestApp(
-      <TestApiProvider apis={[
-        [serviceNowApiRef, mockServiceNowApi],
-        [catalogApiRef, mockCatalogApi],
-        [identityApiRef, mockIdentityApi],
-      ]}>
+      <TestApiProvider
+        apis={[
+          [serviceNowApiRef, mockServiceNowApi],
+          [catalogApiRef, mockCatalogApi],
+          [identityApiRef, mockIdentityApi],
+        ]}
+      >
         <EntityProvider entity={mockEntity}>
           <ServicenowContent />
         </EntityProvider>
@@ -144,11 +148,13 @@ describe('ServicenowContent', () => {
     mockServiceNowApi.getIncidents.mockResolvedValue([]);
 
     await renderInTestApp(
-      <TestApiProvider apis={[
-        [serviceNowApiRef, mockServiceNowApi],
-        [catalogApiRef, mockCatalogApi],
-        [identityApiRef, mockIdentityApi],
-      ]}>
+      <TestApiProvider
+        apis={[
+          [serviceNowApiRef, mockServiceNowApi],
+          [catalogApiRef, mockCatalogApi],
+          [identityApiRef, mockIdentityApi],
+        ]}
+      >
         <EntityProvider entity={mockEntity}>
           <ServicenowContent />
         </EntityProvider>
@@ -168,11 +174,13 @@ describe('ServicenowContent', () => {
   it('handles search input updates', async () => {
     const user = userEvent.setup();
     await renderInTestApp(
-      <TestApiProvider apis={[
-        [serviceNowApiRef, mockServiceNowApi],
-        [catalogApiRef, mockCatalogApi],
-        [identityApiRef, mockIdentityApi],
-      ]}>
+      <TestApiProvider
+        apis={[
+          [serviceNowApiRef, mockServiceNowApi],
+          [catalogApiRef, mockCatalogApi],
+          [identityApiRef, mockIdentityApi],
+        ]}
+      >
         <EntityProvider entity={mockEntity}>
           <ServicenowContent />
         </EntityProvider>
