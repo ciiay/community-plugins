@@ -30,8 +30,15 @@ export type IncidentPick = {
   sys_created_on: string;
   priority: number;
   incident_state: number;
+  url: string;
 };
 
+/**
+ * Enum of incident field keys used in both frontend and backend for sorting and column mapping.
+ * These values represent the field names from the ServiceNow incident table.
+ * The `url` field is synthesized in the backend to provide a direct link to the incident in ServiceNow UI.
+ * @public
+ */
 export const IncidentFieldEnum = {
   Number: 'number',
   ShortDescription: 'short_description',
@@ -39,14 +46,40 @@ export const IncidentFieldEnum = {
   Created: 'sys_created_on',
   Priority: 'priority',
   IncidentState: 'incident_state',
+  Url: 'url',
 } as const;
 
+/**
+ * Enum for sorting order used in incident queries.
+ * It aligns with the sorting direction supported by ServiceNow API.
+ * @public
+ */
 export const SortingOrderEnum = {
   Asc: 'asc',
   Desc: 'desc',
 } as const;
+/**
+ * Type helper for `SortingOrderEnum`, representing the entire enum object.
+ * @public
+ */
 export type SortingOrderEnumType = typeof SortingOrderEnum;
 
+/**
+ * Union type of possible sorting order values ('asc' | 'desc').
+ * Used to enforce valid values in sorting-related parameters.
+ * @public
+ */
 export type Order = SortingOrderEnumType[keyof SortingOrderEnumType];
 
+/**
+ * Annotation field name used to associate a Backstage entity with a ServiceNow service or system.
+ * This annotation should be added to the entity in the catalog to enable filtering incidents.
+ * @example
+ * ```yaml
+ * metadata:
+ *   annotations:
+ *     servicenow.com/entity-id: my-service-id
+ * ```
+ * @public
+ */
 export const ServiceAnnotationFieldName = 'servicenow.com/entity-id';

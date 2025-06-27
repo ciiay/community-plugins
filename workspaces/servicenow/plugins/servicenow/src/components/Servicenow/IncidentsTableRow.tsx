@@ -36,25 +36,6 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const getIncidentUrl = (incidentNumber: string) => {
-  // eslint-disable-next-line no-console
-  console.log(incidentNumber);
-  return `https://dev312848.service-now.com/nav_to.do?uri=incident.do?sys_id=1c741bd70b2322007518478d83673af3`;
-};
-
-// uncomment this when backend plugin is implemented
-// const getIncidentUrl = async (incidentNumber: string): Promise<string | null> => {
-//   try {
-//     // implement this in the ServiceNow backend plugin
-//     const response = await fetch(`/api/servicenow/incident-url?number=${incidentNumber}`);
-//     const data = await response.json();
-//     return data?.url ?? null;
-//   } catch (err) {
-//     console.error('Failed to fetch incident URL:', err);
-//     return null;
-//   }
-// };
-
 export const IncidentsTableRow = ({ data }: { data: IncidentsData }) => {
   const classes = useStyles();
 
@@ -96,9 +77,7 @@ export const IncidentsTableRow = ({ data }: { data: IncidentsData }) => {
         {getIncidentStateValue(data?.incidentState)}
       </TableCell>
       <TableCell align="left" className={classes.tableCellStyle}>
-        <IconButton
-          onClick={() => window.open(getIncidentUrl(data?.number), '_blank')}
-        >
+        <IconButton onClick={() => window.open(data.url, '_blank')}>
           <OpenInNewIcon fontSize="small" style={{ color: 'inherit' }} />
         </IconButton>
       </TableCell>
