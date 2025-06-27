@@ -97,13 +97,22 @@ export function validateIncidentQueryParams(
     orderBy: orderByQuery,
   } = query;
 
-  // entityId validation
-  if (typeof entityIdQuery !== 'string' || !entityIdQuery.trim()) {
-    throw new InputError(
-      'entityId is a required query parameter and cannot be empty.',
-    );
+  let entityId: string | undefined;
+
+  if (userEmail === undefined) {
+    // entityId is required if userEmail is not present
+    if (typeof entityIdQuery !== 'string' || !entityIdQuery.trim()) {
+      throw new InputError(
+        'Either userEmail or entityId must be provided. entityId is missing.',
+      );
+    }
+    entityId = entityIdQuery.trim();
+  } else {
+    // userEmail is present, entityId is optional
+    if (typeof entityIdQuery === 'string' && entityIdQuery.trim()) {
+      entityId = entityIdQuery.trim();
+    }
   }
-  const entityId: string = entityIdQuery.trim();
 
   // userEmail validation
   if (userEmail !== undefined) {

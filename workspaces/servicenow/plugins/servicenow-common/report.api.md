@@ -4,10 +4,40 @@
 
 ```ts
 // @public
-export const COMMON_CONSTANT = 1;
+export const IncidentFieldEnum: {
+  readonly Number: 'number';
+  readonly ShortDescription: 'short_description';
+  readonly Description: 'description';
+  readonly Created: 'sys_created_on';
+  readonly Priority: 'priority';
+  readonly IncidentState: 'incident_state';
+  readonly Url: 'url';
+};
 
 // @public
-export type CommonType = {
-  field: string;
+export type IncidentPick = {
+  sys_id: string;
+  number: string;
+  short_description: string;
+  description: string;
+  sys_created_on: string;
+  priority: number;
+  incident_state: number;
+  url: string;
 };
+
+// @public
+export type Order = SortingOrderEnumType[keyof SortingOrderEnumType];
+
+// @public
+export const ServiceAnnotationFieldName = 'servicenow.com/entity-id';
+
+// @public
+export const SortingOrderEnum: {
+  readonly Asc: 'asc';
+  readonly Desc: 'desc';
+};
+
+// @public
+export type SortingOrderEnumType = typeof SortingOrderEnum;
 ```

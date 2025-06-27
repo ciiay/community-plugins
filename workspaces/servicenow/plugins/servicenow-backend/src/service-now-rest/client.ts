@@ -22,15 +22,12 @@ import {
   AccessToken,
 } from 'simple-oauth2';
 import axios from 'axios';
-import {
-  IncidentPick,
-  ServiceAnnotationFieldName,
-} from '@backstage-community/plugin-servicenow-common';
+import { IncidentPick } from '@backstage-community/plugin-servicenow-common';
 import { OAuthConfig, ServiceNowConfig } from '../../config';
 
 export type IncidentQueryParams = {
-  entityId: string;
-  userEmail: string;
+  userEmail?: string;
+  entityId?: string;
   state?: string;
   priority?: string;
   search?: string;
@@ -211,6 +208,8 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     if (options.userEmail) {
       const id = await this.getUserSysIdByEmail(options.userEmail);
       queryParts.push(`caller_id=${id}^ORopened_by=${id}^ORassigned_to=${id}`);
+    } else if (options.entityId) {
+      queryParts.push(`u_backstage_entity_id=${options.entityId}`);
     }
 
     if (options.state) queryParts.push(`state${options.state}`);
@@ -221,10 +220,6 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       queryParts.push(
         `short_descriptionLIKE${searchTerm}^ORdescriptionLIKE${searchTerm}`,
       );
-    }
-
-    if (options.entityId) {
-      queryParts.push(`u_backstage_entity_id=${options.entityId}`);
     }
 
     if (options.orderBy) {
@@ -269,7 +264,10 @@ export class DefaultServiceNowClient implements ServiceNowClient {
         this.logger.debug(
           `Successfully fetched ${response.data.result.length} incidents.`,
         );
-        return response.data.result;
+        return response.data.result.map((incident: any) => ({
+          ...incident,
+          url: `${this.instanceUrl}/nav_to.do?uri=incident.do?sys_id=${incident.sys_id}`,
+        }));
       }
       this.logger.warn('ServiceNow incidents response format unexpected.', {
         responseData: response.data,
