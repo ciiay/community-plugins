@@ -84,7 +84,6 @@ function parseAndValidateMultiValueQueryParam(
 
 export function validateIncidentQueryParams(
   query: ParsedQs,
-  userEmail: string,
 ): IncidentQueryParams {
   const {
     entityId: entityIdQuery,
@@ -95,40 +94,32 @@ export function validateIncidentQueryParams(
     offset: offsetQuery,
     order: orderQuery,
     orderBy: orderByQuery,
+    userEmail: userEmailQuery,
   } = query;
-
-  let entityId: string | undefined;
-
-  if (userEmail === undefined) {
-    // entityId is required if userEmail is not present
-    if (typeof entityIdQuery !== 'string' || !entityIdQuery.trim()) {
-      throw new InputError(
-        'Either userEmail or entityId must be provided. entityId is missing.',
-      );
-    }
-    entityId = entityIdQuery.trim();
-  } else {
-    // userEmail is present, entityId is optional
-    if (typeof entityIdQuery === 'string' && entityIdQuery.trim()) {
-      entityId = entityIdQuery.trim();
-    }
-  }
+  const validatedParams: IncidentQueryParams = {};
 
   // userEmail validation
-  if (userEmail !== undefined) {
-    if (typeof userEmail !== 'string' || !userEmail.trim()) {
+  if (userEmailQuery !== undefined) {
+    if (typeof userEmailQuery !== 'string' || !userEmailQuery.trim()) {
       throw new InputError('userEmail must be a non-empty string.');
     }
     // Basic email format validation
-    if (!/.+@.+\..+/.test(userEmail)) {
+    if (!/.+@.+\..+/.test(userEmailQuery)) {
       throw new InputError('userEmail must be a valid email address.');
     }
+    validatedParams.userEmail = userEmailQuery.trim();
   }
 
-  const validatedParams: IncidentQueryParams = {
-    entityId,
-    userEmail,
-  };
+  if (entityIdQuery !== undefined) {
+    if (typeof entityIdQuery !== 'string' || !entityIdQuery.trim()) {
+      throw new InputError('entityId must be a non-empty string.');
+    }
+    validatedParams.entityId = entityIdQuery.trim();
+  }
+
+  if (!validatedParams.userEmail && !validatedParams.entityId) {
+    throw new InputError('entityId is required if userEmail is not present.');
+  }
 
   // limit validation
   if (limitQuery !== undefined) {

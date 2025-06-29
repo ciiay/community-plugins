@@ -19,7 +19,6 @@ import {
 } from '@backstage/backend-plugin-api';
 import { createRouter } from './service';
 import { readServiceNowConfig } from './config';
-import { CatalogClient } from '@backstage/catalog-client';
 import { ServiceNowConfig } from '../config';
 
 /**
@@ -36,19 +35,8 @@ export const servicenowPlugin = createBackendPlugin({
         config: coreServices.rootConfig,
         httpRouter: coreServices.httpRouter,
         httpAuth: coreServices.httpAuth,
-        auth: coreServices.auth,
-        userInfoService: coreServices.userInfo,
-        discovery: coreServices.discovery,
       },
-      async init({
-        logger,
-        config,
-        httpRouter,
-        httpAuth,
-        userInfoService,
-        auth,
-        discovery,
-      }) {
+      async init({ logger, config, httpRouter, httpAuth }) {
         const servicenowConfig: ServiceNowConfig | undefined =
           readServiceNowConfig(config);
 
@@ -59,16 +47,11 @@ export const servicenowPlugin = createBackendPlugin({
           return;
         }
 
-        const catalogClient = new CatalogClient({ discoveryApi: discovery });
-
         httpRouter.use(
           await createRouter({
             logger,
             servicenowConfig,
-            userInfoService: userInfoService,
             httpAuth,
-            auth,
-            catalogApi: catalogClient,
           }),
         );
       },
