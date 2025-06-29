@@ -22,12 +22,9 @@ import {
 import { startTestBackend, mockServices } from '@backstage/backend-test-utils';
 import { createRouter } from './service/router';
 import { readServiceNowConfig } from './config';
-import { CatalogClient } from '@backstage/catalog-client';
-import { catalogServiceMock } from '@backstage/plugin-catalog-node/testUtils';
 
 jest.mock('./service/router');
 jest.mock('./config');
-jest.mock('@backstage/catalog-client');
 
 describe('servicenowPlugin', () => {
   const mockRouter = jest.fn();
@@ -49,11 +46,6 @@ describe('servicenowPlugin', () => {
       mockConfig.data.servicenow,
     );
 
-    const catalogApi = catalogServiceMock();
-    (CatalogClient as jest.Mock).mockImplementation(() => {
-      return catalogApi;
-    });
-
     const httpRouter = mockServices.httpRouter.mock();
 
     await startTestBackend({
@@ -67,9 +59,6 @@ describe('servicenowPlugin', () => {
           factory: () => httpRouter,
         }),
         mockServices.httpAuth.factory(),
-        mockServices.auth.factory(),
-        mockServices.userInfo.factory(),
-        mockServices.discovery.factory(),
       ],
     });
 
@@ -77,7 +66,8 @@ describe('servicenowPlugin', () => {
     expect(createRouter).toHaveBeenCalledWith(
       expect.objectContaining({
         servicenowConfig: mockConfig.data.servicenow,
-        catalogApi: catalogApi,
+        logger: expect.anything(),
+        httpAuth: expect.anything(),
       }),
     );
     expect(httpRouter.use).toHaveBeenCalledWith(mockRouter);
@@ -99,9 +89,6 @@ describe('servicenowPlugin', () => {
           factory: () => httpRouter,
         }),
         mockServices.httpAuth.factory(),
-        mockServices.auth.factory(),
-        mockServices.userInfo.factory(),
-        mockServices.discovery.factory(),
       ],
     });
 

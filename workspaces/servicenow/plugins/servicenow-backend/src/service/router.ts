@@ -13,45 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {
-  InputError,
-  NotFoundError,
-  AuthenticationError,
-} from '@backstage/errors';
+import { InputError } from '@backstage/errors';
 import { validateIncidentQueryParams } from './validator';
-import {
-  AuthService,
-  HttpAuthService,
-  LoggerService,
-  UserInfoService,
-} from '@backstage/backend-plugin-api';
+import { HttpAuthService, LoggerService } from '@backstage/backend-plugin-api';
 import express from 'express';
 import Router from 'express-promise-router';
 import { DefaultServiceNowClient } from '../service-now-rest/client';
-import type { CatalogApi } from '@backstage/catalog-client';
-import { Entity } from '@backstage/catalog-model';
 import { ServiceNowConfig } from '../../config';
 
 export interface RouterOptions {
   logger: LoggerService;
   servicenowConfig: ServiceNowConfig;
-  userInfoService: UserInfoService;
   httpAuth: HttpAuthService;
-  auth: AuthService;
-  catalogApi: CatalogApi;
 }
 
 export async function createRouter(
   options: RouterOptions,
 ): Promise<express.Router> {
-  const {
-    logger,
-    servicenowConfig,
-    userInfoService,
-    httpAuth,
-    auth,
-    catalogApi,
-  } = options;
+  const { logger, servicenowConfig, httpAuth } = options;
 
   logger.info(
     `Creating router for ServiceNow with instance URL: ${servicenowConfig.servicenow?.instanceUrl}`,
@@ -70,48 +49,11 @@ export async function createRouter(
   });
 
   router.get('/incidents', async (req, res) => {
-    const userCredentials = await httpAuth.credentials(req, {
+    await httpAuth.credentials(req, {
       allow: ['user'],
     });
 
-    const userInfo = await userInfoService.getUserInfo(userCredentials);
-    if (!userInfo.userEntityRef) {
-      throw new InputError('User entity reference not found in user info');
-    }
-
-    const ownCreds = await auth.getOwnServiceCredentials();
-    const pluginTokenResponse = await auth.getPluginRequestToken({
-      onBehalfOf: ownCreds,
-      targetPluginId: 'catalog',
-    });
-
-    if (!pluginTokenResponse.token) {
-      throw new AuthenticationError('Plugin token is missing or invalid');
-    }
-    const catalogToken = pluginTokenResponse.token;
-
-    const userEntity: Entity | undefined = await catalogApi.getEntityByRef(
-      userInfo.userEntityRef,
-      { token: catalogToken },
-    );
-
-    if (!userEntity) {
-      throw new NotFoundError(
-        `User entity not found for ref: ${userInfo.userEntityRef}`,
-      );
-    }
-
-    const loggedInUserEmail = (userEntity.spec?.profile as any)?.email;
-    if (!loggedInUserEmail) {
-      throw new NotFoundError(
-        `Email not found for user ${userInfo.userEntityRef}`,
-      );
-    }
-
-    const validatedParams = validateIncidentQueryParams(
-      req.query,
-      loggedInUserEmail,
-    );
+    const validatedParams = validateIncidentQueryParams(req.query);
     try {
       const incidents = await client.fetchIncidents(validatedParams);
       res.json(incidents);
