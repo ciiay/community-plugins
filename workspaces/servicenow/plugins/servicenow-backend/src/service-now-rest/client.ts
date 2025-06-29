@@ -208,8 +208,6 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     if (options.userEmail) {
       const id = await this.getUserSysIdByEmail(options.userEmail);
       queryParts.push(`caller_id=${id}^ORopened_by=${id}^ORassigned_to=${id}`);
-    } else if (options.entityId) {
-      queryParts.push(`u_backstage_entity_id=${options.entityId}`);
     }
 
     if (options.state) queryParts.push(`state${options.state}`);
@@ -220,6 +218,10 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       queryParts.push(
         `short_descriptionLIKE${searchTerm}^ORdescriptionLIKE${searchTerm}`,
       );
+    }
+
+    if (options.entityId) {
+      queryParts.push(`u_backstage_entity_id=${options.entityId}`);
     }
 
     if (options.orderBy) {

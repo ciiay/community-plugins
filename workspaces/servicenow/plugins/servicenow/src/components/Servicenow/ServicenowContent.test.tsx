@@ -15,14 +15,22 @@
  */
 
 import { EntityProvider, catalogApiRef } from '@backstage/plugin-catalog-react';
-import { screen, waitFor } from '@testing-library/react';
-import { renderInTestApp, TestApiProvider } from '@backstage/test-utils';
+import { render, screen, waitFor } from '@testing-library/react';
+import { TestApiProvider } from '@backstage/test-utils';
 import { ServiceAnnotationFieldName } from '@backstage-community/plugin-servicenow-common';
+import { MemoryRouter } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@material-ui/core';
 import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
 import { mockIncidents } from '../../mocks/mockData';
 import userEvent from '@testing-library/user-event';
 import { ServicenowContent } from './ServicenowContent';
-import { identityApiRef } from '@backstage/core-plugin-api';
+import {
+  identityApiRef,
+  alertApiRef,
+  errorApiRef,
+} from '@backstage/core-plugin-api';
+import { translationApiRef } from '@backstage/core-plugin-api/alpha';
+import { of } from 'rxjs';
 
 const mockEntity = {
   apiVersion: 'backstage.io/v1alpha1',
@@ -49,27 +57,30 @@ const mockIdentityApi = {
   signOut: async () => {},
 };
 
-jest.mock('react-router-dom', () => {
-  const originalModule = jest.requireActual('react-router-dom');
-  return {
-    ...originalModule,
-    useSearchParams: () => {
-      const params = new URLSearchParams();
-      const setSearchParams = jest.fn();
-      return [params, setSearchParams];
-    },
-  };
-});
+const mockAlertApi = {
+  post: jest.fn(),
+  alert$: jest.fn(),
+};
 
-jest.mock('../../hooks/useDebouncedValue', () => ({
-  useDebouncedValue: (value: string) => value,
-}));
+const mockErrorApi = {
+  post: jest.fn(),
+  error$: jest.fn(),
+};
 
-jest.mock('../../hooks/useQueryState', () => ({
-  useQueryState: (_: string, defaultValue: any) => {
-    return [defaultValue, jest.fn()];
-  },
-}));
+const mockTranslationApi = {
+  getTranslation: jest.fn().mockReturnValue({
+    ready: true,
+    t: (key: string) => key,
+  }),
+  translation$: jest.fn().mockReturnValue(
+    of({
+      ready: true,
+      t: (key: string) => key,
+    }),
+  ),
+};
+
+const theme = createTheme();
 
 describe('ServicenowContent', () => {
   const mockServiceNowApi = {
@@ -82,18 +93,25 @@ describe('ServicenowContent', () => {
   });
 
   it('renders the table with incident rows', async () => {
-    await renderInTestApp(
-      <TestApiProvider
-        apis={[
-          [serviceNowApiRef, mockServiceNowApi],
-          [catalogApiRef, mockCatalogApi],
-          [identityApiRef, mockIdentityApi],
-        ]}
-      >
-        <EntityProvider entity={mockEntity}>
-          <ServicenowContent />
-        </EntityProvider>
-      </TestApiProvider>,
+    render(
+      <MemoryRouter>
+        <ThemeProvider theme={theme}>
+          <TestApiProvider
+            apis={[
+              [serviceNowApiRef, mockServiceNowApi],
+              [catalogApiRef, mockCatalogApi],
+              [identityApiRef, mockIdentityApi],
+              [alertApiRef, mockAlertApi],
+              [errorApiRef, mockErrorApi],
+              [translationApiRef, mockTranslationApi as any],
+            ]}
+          >
+            <EntityProvider entity={mockEntity}>
+              <ServicenowContent />
+            </EntityProvider>
+          </TestApiProvider>
+        </ThemeProvider>
+      </MemoryRouter>,
     );
 
     await waitFor(() => {
@@ -117,18 +135,25 @@ describe('ServicenowContent', () => {
   });
 
   it('displays pagination dropdown', async () => {
-    await renderInTestApp(
-      <TestApiProvider
-        apis={[
-          [serviceNowApiRef, mockServiceNowApi],
-          [catalogApiRef, mockCatalogApi],
-          [identityApiRef, mockIdentityApi],
-        ]}
-      >
-        <EntityProvider entity={mockEntity}>
-          <ServicenowContent />
-        </EntityProvider>
-      </TestApiProvider>,
+    render(
+      <MemoryRouter>
+        <ThemeProvider theme={theme}>
+          <TestApiProvider
+            apis={[
+              [serviceNowApiRef, mockServiceNowApi],
+              [catalogApiRef, mockCatalogApi],
+              [identityApiRef, mockIdentityApi],
+              [alertApiRef, mockAlertApi],
+              [errorApiRef, mockErrorApi],
+              [translationApiRef, mockTranslationApi as any],
+            ]}
+          >
+            <EntityProvider entity={mockEntity}>
+              <ServicenowContent />
+            </EntityProvider>
+          </TestApiProvider>
+        </ThemeProvider>
+      </MemoryRouter>,
     );
 
     await waitFor(() => {
@@ -147,18 +172,25 @@ describe('ServicenowContent', () => {
   it('shows empty content placeholder when no incidents are available', async () => {
     mockServiceNowApi.getIncidents.mockResolvedValue([]);
 
-    await renderInTestApp(
-      <TestApiProvider
-        apis={[
-          [serviceNowApiRef, mockServiceNowApi],
-          [catalogApiRef, mockCatalogApi],
-          [identityApiRef, mockIdentityApi],
-        ]}
-      >
-        <EntityProvider entity={mockEntity}>
-          <ServicenowContent />
-        </EntityProvider>
-      </TestApiProvider>,
+    render(
+      <MemoryRouter>
+        <ThemeProvider theme={theme}>
+          <TestApiProvider
+            apis={[
+              [serviceNowApiRef, mockServiceNowApi],
+              [catalogApiRef, mockCatalogApi],
+              [identityApiRef, mockIdentityApi],
+              [alertApiRef, mockAlertApi],
+              [errorApiRef, mockErrorApi],
+              [translationApiRef, mockTranslationApi as any],
+            ]}
+          >
+            <EntityProvider entity={mockEntity}>
+              <ServicenowContent />
+            </EntityProvider>
+          </TestApiProvider>
+        </ThemeProvider>
+      </MemoryRouter>,
     );
 
     await waitFor(() => {
@@ -173,18 +205,25 @@ describe('ServicenowContent', () => {
 
   it('handles search input updates', async () => {
     const user = userEvent.setup();
-    await renderInTestApp(
-      <TestApiProvider
-        apis={[
-          [serviceNowApiRef, mockServiceNowApi],
-          [catalogApiRef, mockCatalogApi],
-          [identityApiRef, mockIdentityApi],
-        ]}
-      >
-        <EntityProvider entity={mockEntity}>
-          <ServicenowContent />
-        </EntityProvider>
-      </TestApiProvider>,
+    render(
+      <MemoryRouter>
+        <ThemeProvider theme={theme}>
+          <TestApiProvider
+            apis={[
+              [serviceNowApiRef, mockServiceNowApi],
+              [catalogApiRef, mockCatalogApi],
+              [identityApiRef, mockIdentityApi],
+              [alertApiRef, mockAlertApi],
+              [errorApiRef, mockErrorApi],
+              [translationApiRef, mockTranslationApi as any],
+            ]}
+          >
+            <EntityProvider entity={mockEntity}>
+              <ServicenowContent />
+            </EntityProvider>
+          </TestApiProvider>
+        </ThemeProvider>
+      </MemoryRouter>,
     );
 
     await waitFor(() => {

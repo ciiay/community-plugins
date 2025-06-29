@@ -16,35 +16,36 @@
 
 import { useEffect, useState } from 'react';
 import { useUserProfile } from '@backstage/plugin-user-settings';
-import { parseEntityRef, UserEntity } from '@backstage/catalog-model';
-import { useLocation } from 'react-router-dom';
+import { UserEntity } from '@backstage/catalog-model';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
 import { useApi } from '@backstage/core-plugin-api';
 
-const useUserEmail = (): string | undefined => {
-  const { pathname } = useLocation();
+const useUserEmail = (kind: string): string | undefined => {
   const catalogApi = useApi(catalogApiRef);
 
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [profileLink, setProfileLink] = useState<string | null>(null);
 
   const { backstageIdentity, profile, loading } = useUserProfile();
 
   useEffect(() => {
+    if (kind !== 'user') {
+      setUserEmail(null);
+      return;
+    }
+
     if (loading) return;
+
     const fetchUserEntity = async () => {
       if (!backstageIdentity?.userEntityRef) {
         setUserEmail(null);
-        setProfileLink(null);
         return;
       }
 
       try {
-        const { namespace = 'default', name } = parseEntityRef(
-          backstageIdentity.userEntityRef,
-        );
-        const profileUrl = `/catalog/${namespace}/user/${name}`;
-        setProfileLink(profileUrl);
+        if (profile?.email) {
+          setUserEmail(profile.email);
+          return;
+        }
 
         const userEntity = await catalogApi.getEntityByRef(
           backstageIdentity.userEntityRef,
@@ -57,18 +58,19 @@ const useUserEmail = (): string | undefined => {
         setUserEmail(email);
       } catch (error) {
         setUserEmail(null);
-        setProfileLink(null);
       }
     };
 
     fetchUserEntity();
-  }, [loading, backstageIdentity?.userEntityRef, catalogApi, profile?.email]);
+  }, [
+    kind,
+    loading,
+    backstageIdentity?.userEntityRef,
+    catalogApi,
+    profile?.email,
+  ]);
 
-  const isOnProfilePage =
-    profileLink &&
-    (pathname === profileLink || pathname.startsWith(`${profileLink}/`));
-
-  return isOnProfilePage ? userEmail ?? undefined : undefined;
+  return userEmail ?? undefined;
 };
 
 export default useUserEmail;
