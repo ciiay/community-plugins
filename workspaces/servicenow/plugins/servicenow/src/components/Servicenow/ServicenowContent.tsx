@@ -79,7 +79,9 @@ export const ServicenowContent = () => {
   const entityId = entity.metadata.annotations?.[ServiceAnnotationFieldName];
   const priorityFromParams = searchParams.get('priority');
   const stateFromParams = searchParams.get('state');
-  const userEmail = useUserEmail();
+
+  const kind = entity.kind.toLocaleLowerCase('en-US');
+  const userEmail = useUserEmail(kind);
 
   useEffect(() => {
     setSearchParams(
@@ -134,8 +136,8 @@ export const ServicenowContent = () => {
           search: debouncedSearch,
           priority: priorityFromParams?.split(',') ?? undefined,
           state: stateFromParams?.split(',') ?? undefined,
-          ...(userEmail ? { userEmail } : {}),
-          ...(entityId && !userEmail ? { entityId } : {}),
+          userEmail,
+          entityId,
         });
 
         const data = await serviceNowApi.getIncidents(queryParams);
