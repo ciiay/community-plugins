@@ -16,51 +16,43 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-export function useQueryState<T>(
+export function useQueryArrayState(
   key: string,
-  defaultValue: T,
-): [T, (value: T) => void] {
+  defaultValue: string[] = [],
+): [string[], (value: string[]) => void] {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const getValueFromParams = useCallback(
-    (raw: string | null): T => {
-      if (typeof defaultValue === 'number') {
-        return (raw !== null ? Number(raw) : defaultValue) as T;
-      }
-      if (typeof defaultValue === 'boolean') {
-        return (raw === 'true') as T;
-      }
-      return (raw ?? defaultValue) as T;
-    },
-    [defaultValue],
-  );
+  const getArrayFromParam = useCallback((): string[] => {
+    const raw = searchParams.get(key);
+    return raw ? raw.split(',').filter(Boolean) : defaultValue;
+  }, [key, searchParams, defaultValue]);
 
-  const [state, setState] = useState<T>(() =>
-    getValueFromParams(searchParams.get(key)),
-  );
+  const [state, setState] = useState<string[]>(() => getArrayFromParam());
 
   useEffect(() => {
-    const paramValue = getValueFromParams(searchParams.get(key));
-    setState(paramValue);
-  }, [getValueFromParams, searchParams, key]);
+    const value = getArrayFromParam();
+    setState(prev => {
+      const prevRaw = prev.join(',');
+      const nextRaw = value.join(',');
+      return prevRaw === nextRaw ? prev : value;
+    });
+  }, [getArrayFromParam]);
 
   const setValue = useCallback(
-    (newValue: T) => {
+    (newValue: string[]) => {
+      const newRaw = newValue.join(',');
       const currentRaw = searchParams.get(key);
-      const newRaw = String(newValue);
 
       if (currentRaw === newRaw || (!currentRaw && newRaw === '')) return;
 
       setSearchParams(
         prev => {
           const params = new URLSearchParams(prev);
-
           if (newRaw === '') {
             params.delete(key);
           } else {
             params.set(key, newRaw);
           }
-
           return params;
         },
         { replace: true },

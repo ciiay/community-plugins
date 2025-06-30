@@ -15,52 +15,40 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useQueryState } from './useQueryState';
 import { INCIDENT_STATE_MAP, PRIORITY_MAP } from '../utils/incidentUtils';
+import { SelectItem } from '@backstage/core-components';
 
-export const useQueryArrayFilter = (filterName: string) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+export const useQueryArrayFilter = (filterName: 'state' | 'priority') => {
+  const [raw, setRaw] = useQueryState<string>(filterName, '');
+  const [, setOffset] = useQueryState<number>('offset', 0);
 
-  const current = useMemo(() => {
-    const values = searchParams.get(filterName)?.split(',') ?? [];
-    const map = filterName === 'state' ? INCIDENT_STATE_MAP : PRIORITY_MAP;
+  const map = filterName === 'state' ? INCIDENT_STATE_MAP : PRIORITY_MAP;
 
-    return values
+  const current: SelectItem[] = useMemo(() => {
+    return raw
+      .split(',')
+      .filter(v => v !== '')
       .map(value => ({
-        label: map[Number(value)]?.label,
         value,
+        label: map[Number(value)]?.label,
       }))
       .filter(item => item.label);
-  }, [filterName, searchParams]);
+  }, [raw, map]);
 
   const set = useCallback(
     (newValues: (string | number)[]) => {
-      setSearchParams(
-        params => {
-          const newParams = new URLSearchParams(params);
-          if (newValues.length > 0) {
-            newParams.set(filterName, newValues.join(','));
-          } else {
-            newParams.delete(filterName);
-          }
-          return newParams;
-        },
-        { replace: true },
-      );
+      const joined = newValues.join(',');
+      setRaw(joined);
+      setOffset(0);
     },
-    [filterName, setSearchParams],
+    [setRaw, setOffset],
   );
 
   const clear = useCallback(() => {
-    setSearchParams(
-      params => {
-        const newParams = new URLSearchParams(params);
-        newParams.delete(filterName);
-        return newParams;
-      },
-      { replace: true },
-    );
-  }, [filterName, setSearchParams]);
+    setRaw('');
+    setOffset(0);
+  }, [setRaw, setOffset]);
 
   return useMemo(
     () =>
