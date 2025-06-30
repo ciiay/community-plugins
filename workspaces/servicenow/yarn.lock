@@ -2796,7 +2796,6 @@ __metadata:
     "@backstage/core-plugin-api": "npm:^1.10.7"
     "@backstage/dev-utils": "npm:^1.1.10"
     "@backstage/plugin-catalog-react": "npm:^1.18.0"
-    "@backstage/plugin-user-settings": "npm:^0.8.23"
     "@backstage/test-utils": "npm:^1.7.8"
     "@backstage/theme": "npm:^0.6.6"
     "@material-ui/core": "npm:^4.12.4"
@@ -5160,7 +5159,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@backstage/plugin-user-settings@npm:^0.8.22, @backstage/plugin-user-settings@npm:^0.8.23":
+"@backstage/plugin-user-settings@npm:^0.8.22":
   version: 0.8.23
   resolution: "@backstage/plugin-user-settings@npm:0.8.23"
   dependencies:
