@@ -176,9 +176,9 @@ export const ServicenowContent = () => {
               columns={IncidentsListColumns}
               onSearchChange={handleSearch}
               title={
-                incidentsData.length === 0
+                count === 0
                   ? 'ServiceNow tickets'
-                  : `ServiceNow tickets (${incidentsData.length})`
+                  : `ServiceNow tickets (${count})`
               }
               localization={{ toolbar: { searchPlaceholder: 'Search' } }}
               components={{
