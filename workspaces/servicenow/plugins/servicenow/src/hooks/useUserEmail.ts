@@ -14,63 +14,29 @@
  * limitations under the License.
  */
 
-import { useEffect, useState } from 'react';
-import { useUserProfile } from '@backstage/plugin-user-settings';
-import { UserEntity } from '@backstage/catalog-model';
+import { identityApiRef, useApi } from '@backstage/core-plugin-api';
 import { catalogApiRef } from '@backstage/plugin-catalog-react';
-import { useApi } from '@backstage/core-plugin-api';
+import { UserEntity } from '@backstage/catalog-model';
+import { useAsync } from 'react-use';
 
-const useUserEmail = (kind: string): string | undefined => {
+export function useUserEmail(kind: string): string | undefined {
+  const identityApi = useApi(identityApiRef);
   const catalogApi = useApi(catalogApiRef);
 
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const state = useAsync(async () => {
+    if (kind !== 'user') return undefined;
 
-  const { backstageIdentity, profile, loading } = useUserProfile();
+    const profile = await identityApi.getProfileInfo();
+    if (profile?.email) return profile.email;
 
-  useEffect(() => {
-    if (kind !== 'user') {
-      setUserEmail(null);
-      return;
-    }
+    const identity = await identityApi.getBackstageIdentity();
+    const userEntity = (await catalogApi.getEntityByRef(
+      identity.userEntityRef,
+    )) as UserEntity | undefined;
+    return userEntity?.spec?.profile?.email;
+  }, [identityApi, catalogApi, kind]);
 
-    if (loading) return;
-
-    const fetchUserEntity = async () => {
-      if (!backstageIdentity?.userEntityRef) {
-        setUserEmail(null);
-        return;
-      }
-
-      try {
-        if (profile?.email) {
-          setUserEmail(profile.email);
-          return;
-        }
-
-        const userEntity = await catalogApi.getEntityByRef(
-          backstageIdentity.userEntityRef,
-        );
-
-        const userProfile = userEntity as UserEntity;
-        const email =
-          profile?.email ?? userProfile?.spec?.profile?.email ?? null;
-
-        setUserEmail(email);
-      } catch (error) {
-        setUserEmail(null);
-      }
-    };
-
-    fetchUserEntity();
-  }, [
-    kind,
-    loading,
-    backstageIdentity?.userEntityRef,
-    catalogApi,
-    profile?.email,
-  ]);
-
-  return userEmail ?? undefined;
-};
+  return state.value;
+}
 
 export default useUserEmail;

@@ -50,11 +50,12 @@ const mockCatalogApi = {
 };
 
 const mockIdentityApi = {
-  getUserId: () => 'mockuser',
-  getProfile: () => ({ email: 'mock@example.com' }),
-  getIdToken: async () => 'token',
-  getCredentials: async () => ({}),
-  signOut: async () => {},
+  getProfileInfo: async () => ({ email: 'mock@example.com' }),
+  getBackstageIdentity: async () => ({
+    type: 'user' as const,
+    userEntityRef: 'user:default/mockuser',
+    ownershipEntityRefs: ['user:default/mockuser'],
+  }),
 };
 
 const mockAlertApi = {
