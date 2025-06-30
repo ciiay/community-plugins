@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import {
-  useEffect,
-  useState,
-  useCallback,
-  MouseEvent,
-  ChangeEvent,
-} from 'react';
+import { useEffect, useState, MouseEvent, ChangeEvent } from 'react';
 import { useApi } from '@backstage/core-plugin-api';
-import { useSearchParams } from 'react-router-dom';
 
 import {
   CatalogFilterLayout,
@@ -49,6 +42,7 @@ import {
 import { buildIncidentQueryParams } from '../../utils/queryParamsUtils';
 import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import { useQueryState } from '../../hooks/useQueryState';
+import { useQueryArrayState } from '../../hooks/useQueryArrayState';
 import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
 import useUserEmail from '../../hooks/useUserEmail';
 
@@ -56,65 +50,39 @@ export const ServicenowContent = () => {
   const { entity } = useEntity();
   const serviceNowApi = useApi(serviceNowApiRef);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [input, setInput] = useState(() => searchParams.get('search') ?? '');
-  const debouncedSearch = useDebouncedValue(input, 300);
+  const [search, setSearch] = useQueryState<string>('search', '');
+  const [input, setInput] = useState(search);
+  const debouncedInput = useDebouncedValue(input, 300);
 
   const [order, setOrder] = useQueryState<Order>('order', SortingOrderEnum.Asc);
-  const [orderBy, setOrderBy] = useState<IncidentTableField>(
-    () =>
-      (searchParams.get('orderBy') as IncidentTableField) ??
-      IncidentTableFieldEnum.Number,
+  const [orderBy, setOrderBy] = useQueryState<IncidentTableField>(
+    'orderBy',
+    IncidentTableFieldEnum.Number,
   );
 
   const [rowsPerPage, setRowsPerPage] = useQueryState<number>('limit', 5);
   const [offset, setOffset] = useQueryState<number>('offset', 0);
+  const [state] = useQueryArrayState('state', []);
+  const [priority] = useQueryArrayState('priority', []);
 
   const pageNumber = Math.floor(offset / rowsPerPage);
 
-  const [incidents, setIncidents] = useState<IncidentsData[]>([]);
+  const [count, setCount] = useState<number>(0);
+  const [incidentsData, setIncidentsData] = useState<IncidentsData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const entityId = entity.metadata.annotations?.[ServiceAnnotationFieldName];
-  const priorityFromParams = searchParams.get('priority');
-  const stateFromParams = searchParams.get('state');
 
   const kind = entity.kind.toLocaleLowerCase('en-US');
   const userEmail = useUserEmail(kind);
 
   useEffect(() => {
-    setSearchParams(
-      prev => {
-        const params = new URLSearchParams(prev);
-        if (debouncedSearch) {
-          params.set('search', debouncedSearch);
-        } else {
-          params.delete('search');
-        }
-        params.set('limit', String(rowsPerPage));
-        params.set('offset', String(offset));
-        params.set('order', order);
-        params.set('orderBy', orderBy);
-
-        if (userEmail) {
-          params.set('userEmail', userEmail);
-        } else {
-          params.delete('userEmail');
-        }
-        return params;
-      },
-      { replace: true },
-    );
-  }, [
-    debouncedSearch,
-    rowsPerPage,
-    offset,
-    order,
-    orderBy,
-    setSearchParams,
-    userEmail,
-  ]);
+    if (debouncedInput !== search) {
+      setSearch(debouncedInput);
+      setOffset(0);
+    }
+  }, [debouncedInput, search, setSearch, setOffset]);
 
   useEffect(() => {
     async function fetchIncidents() {
@@ -122,7 +90,7 @@ export const ServicenowContent = () => {
       setError(null);
 
       if (!userEmail && !entityId) {
-        setIncidents([]);
+        setIncidentsData([]);
         setLoading(false);
         return;
       }
@@ -133,18 +101,21 @@ export const ServicenowContent = () => {
           offset,
           order,
           orderBy,
-          search: debouncedSearch,
-          priority: priorityFromParams?.split(',') ?? undefined,
-          state: stateFromParams?.split(',') ?? undefined,
+          search: search,
+          priority: priority ?? undefined,
+          state: state ?? undefined,
           userEmail,
           entityId,
         });
 
-        const data = await serviceNowApi.getIncidents(queryParams);
-        setIncidents(data);
+        const { incidents, totalCount } = await serviceNowApi.getIncidents(
+          queryParams,
+        );
+        setIncidentsData(incidents);
+        setCount(totalCount);
       } catch (e) {
         setError((e as Error).message);
-        setIncidents([]);
+        setIncidentsData([]);
       } finally {
         setLoading(false);
       }
@@ -156,27 +127,13 @@ export const ServicenowContent = () => {
     offset,
     order,
     orderBy,
-    debouncedSearch,
+    search,
     serviceNowApi,
     entityId,
-    priorityFromParams,
-    stateFromParams,
+    priority,
+    state,
     userEmail,
   ]);
-
-  const updateQueryParams = useCallback(
-    (key: string, value: string | number) => {
-      setSearchParams(
-        prev => {
-          const params = new URLSearchParams(prev);
-          params.set(key, value.toString());
-          return params;
-        },
-        { replace: true },
-      );
-    },
-    [setSearchParams],
-  );
 
   const handleRowsPerPageChange = (event: ChangeEvent<HTMLInputElement>) => {
     const newLimit = parseInt(event.target.value, 10);
@@ -195,95 +152,84 @@ export const ServicenowContent = () => {
     const isAsc = orderBy === property && order === SortingOrderEnum.Asc;
     setOrder(isAsc ? SortingOrderEnum.Desc : SortingOrderEnum.Asc);
     setOrderBy(property);
+    setOffset(0);
   };
 
   const handleSearch = (str: string) => {
     setInput(str);
-    updateQueryParams('offset', 0);
   };
 
-  if (loading) {
-    return <Box sx={{ padding: 2 }}>Loading incidents...</Box>;
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ padding: 2, color: 'error.main' }}>
-        Error loading incidents: {error}
-      </Box>
-    );
-  }
-
   return (
-    <Box
-      sx={{
-        '& tr[class*="MuiTableRow-root"]': { backgroundColor: 'inherit' },
-        '& tr.MuiTableRow-footer': { borderRadius: '4px' },
-        '& [class*="Component-horizontalScrollContainer-"]': {
-          margin: '0 24px',
-        },
-      }}
-    >
+    <Box>
       <CatalogFilterLayout>
         <CatalogFilterLayout.Filters>
           <IncidentsFilter />
         </CatalogFilterLayout.Filters>
         <CatalogFilterLayout.Content>
-          <Table
-            data={incidents}
-            columns={IncidentsListColumns}
-            onSearchChange={handleSearch}
-            title={
-              incidents.length === 0
-                ? 'ServiceNow tickets'
-                : `ServiceNow tickets (${incidents.length})`
-            }
-            localization={{
-              toolbar: {
-                searchPlaceholder: 'Search',
-              },
-            }}
-            components={{
-              Header: () => (
-                <IncidentsTableHeader
-                  order={order}
-                  orderBy={orderBy}
-                  onRequestSort={handleRequestSort}
-                />
-              ),
-              Body: () => <IncidentsTableBody rows={incidents} />,
-              Pagination: () => (
-                <TablePagination
-                  rowsPerPageOptions={[5, 10, 20, 50, 100].map(n => ({
-                    value: n,
-                    label: `${n} rows`,
-                  }))}
-                  component="div"
-                  sx={{ mr: 1 }}
-                  count={incidents.length ?? 0}
-                  rowsPerPage={rowsPerPage}
-                  page={pageNumber}
-                  onPageChange={handlePageChange}
-                  onRowsPerPageChange={handleRowsPerPageChange}
-                  labelRowsPerPage={null}
-                  showFirstButton
-                  showLastButton
-                />
-              ),
-            }}
-            emptyContent={
-              <Box
-                data-testid="no-incidents-found"
-                sx={{
-                  padding: 2,
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
-                No records found
-              </Box>
-            }
-          />
+          {error ? (
+            <Box sx={{ padding: 2, color: 'error.main' }}>
+              Error loading incidents: {error}
+            </Box>
+          ) : (
+            <Table
+              data={loading ? [] : incidentsData}
+              columns={IncidentsListColumns}
+              onSearchChange={handleSearch}
+              title={
+                incidentsData.length === 0
+                  ? 'ServiceNow tickets'
+                  : `ServiceNow tickets (${incidentsData.length})`
+              }
+              localization={{ toolbar: { searchPlaceholder: 'Search' } }}
+              components={{
+                Header: () => (
+                  <IncidentsTableHeader
+                    order={order}
+                    orderBy={orderBy}
+                    onRequestSort={handleRequestSort}
+                  />
+                ),
+                Body: () =>
+                  loading ? (
+                    <Box sx={{ padding: 2 }}>Loading incidents...</Box>
+                  ) : (
+                    <IncidentsTableBody rows={incidentsData} />
+                  ),
+                Pagination: () => (
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 20, 50, 100].map(n => ({
+                      value: n,
+                      label: `${n} rows`,
+                    }))}
+                    component="div"
+                    sx={{ mr: 1 }}
+                    count={count ?? 0}
+                    rowsPerPage={rowsPerPage}
+                    page={pageNumber}
+                    onPageChange={handlePageChange}
+                    onRowsPerPageChange={handleRowsPerPageChange}
+                    labelRowsPerPage={null}
+                    showFirstButton
+                    showLastButton
+                  />
+                ),
+              }}
+              emptyContent={
+                loading ? null : (
+                  <Box
+                    data-testid="no-incidents-found"
+                    sx={{
+                      padding: 2,
+                      display: 'flex',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    No records found
+                  </Box>
+                )
+              }
+            />
+          )}
         </CatalogFilterLayout.Content>
       </CatalogFilterLayout>
     </Box>

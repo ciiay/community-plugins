@@ -89,7 +89,10 @@ describe('ServicenowContent', () => {
 
   beforeEach(() => {
     mockServiceNowApi.getIncidents.mockReset();
-    mockServiceNowApi.getIncidents.mockResolvedValue(mockIncidents);
+    mockServiceNowApi.getIncidents.mockResolvedValue({
+      incidents: mockIncidents,
+      totalCount: mockIncidents.length,
+    });
   });
 
   it('renders the table with incident rows', async () => {
@@ -170,7 +173,10 @@ describe('ServicenowContent', () => {
   });
 
   it('shows empty content placeholder when no incidents are available', async () => {
-    mockServiceNowApi.getIncidents.mockResolvedValue([]);
+    mockServiceNowApi.getIncidents.mockResolvedValue({
+      incidents: [],
+      totalCount: 0,
+    });
 
     render(
       <MemoryRouter>

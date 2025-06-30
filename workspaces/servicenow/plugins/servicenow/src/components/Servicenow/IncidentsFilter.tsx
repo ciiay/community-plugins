@@ -18,12 +18,15 @@ import Box from '@mui/material/Box';
 import { IncidentEnumFilter } from '../shared-components/IncidentEnumFilter';
 import { INCIDENT_STATE_MAP, PRIORITY_MAP } from '../../utils/incidentUtils';
 import { useQueryArrayFilter } from '../../hooks/useQueryArrayFilter';
-import { useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { SelectItem } from '@backstage/core-components';
 
 export const IncidentsFilter = () => {
   const stateFilter = useQueryArrayFilter('state');
   const priorityFilter = useQueryArrayFilter('priority');
+
+  const stateValue = useMemo(() => stateFilter.current, [stateFilter]);
+  const priorityValue = useMemo(() => priorityFilter.current, [priorityFilter]);
 
   const handleStateChange = useCallback(
     (_e: any, value: SelectItem[]) => {
@@ -52,14 +55,14 @@ export const IncidentsFilter = () => {
         label="State"
         filterKey="state"
         dataMap={INCIDENT_STATE_MAP}
-        value={stateFilter.current}
+        value={stateValue}
         onChange={handleStateChange}
       />
       <IncidentEnumFilter
         label="Priority"
         filterKey="priority"
         dataMap={PRIORITY_MAP}
-        value={priorityFilter.current}
+        value={priorityValue}
         onChange={handlePriorityChange}
       />
     </Box>
