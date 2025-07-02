@@ -57,7 +57,6 @@ export const IncidentEnumFilter = ({
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <InputLabel
         sx={{
-          margin: theme => theme.spacing(1, 0),
           transform: 'initial',
           fontWeight: 'bold',
           fontSize: theme => theme.typography.body2.fontSize,
@@ -87,7 +86,6 @@ export const IncidentEnumFilter = ({
               <Checkbox
                 icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
                 checkedIcon={<CheckBoxIcon fontSize="small" />}
-                style={{ marginRight: 6, paddingLeft: 0 }}
                 checked={selected}
               />
               {renderStatusLabel(statusData)}
