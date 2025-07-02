@@ -45,6 +45,10 @@ import { useQueryState } from '../../hooks/useQueryState';
 import { useQueryArrayState } from '../../hooks/useQueryArrayState';
 import { serviceNowApiRef } from '../../api/ServiceNowBackendClient';
 import useUserEmail from '../../hooks/useUserEmail';
+import CircularProgress from '@mui/material/CircularProgress';
+import TableBody from '@mui/material/TableBody';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 
 export const ServicenowContent = () => {
   const { entity } = useEntity();
@@ -159,6 +163,50 @@ export const ServicenowContent = () => {
     setInput(str);
   };
 
+  const IncidentsTableHeaderComponent = () => (
+    <IncidentsTableHeader
+      order={order}
+      orderBy={orderBy}
+      onRequestSort={handleRequestSort}
+    />
+  );
+
+  const IncidentsTableBodyComponent = () =>
+    loading ? (
+      <TableBody>
+        <TableRow>
+          <TableCell colSpan={IncidentsListColumns.length} align="center">
+            <Box sx={{ py: 3 }}>
+              <CircularProgress />
+            </Box>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    ) : (
+      <IncidentsTableBody rows={incidentsData} />
+    );
+
+  const TablePaginationComponent = () => {
+    return (
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 20, 50, 100].map(n => ({
+          value: n,
+          label: `${n} rows`,
+        }))}
+        component="div"
+        sx={{ mr: 1 }}
+        count={count ?? 0}
+        rowsPerPage={rowsPerPage}
+        page={pageNumber}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        labelRowsPerPage={null}
+        showFirstButton
+        showLastButton
+      />
+    );
+  };
+
   return (
     <Box>
       <CatalogFilterLayout>
@@ -182,37 +230,9 @@ export const ServicenowContent = () => {
               }
               localization={{ toolbar: { searchPlaceholder: 'Search' } }}
               components={{
-                Header: () => (
-                  <IncidentsTableHeader
-                    order={order}
-                    orderBy={orderBy}
-                    onRequestSort={handleRequestSort}
-                  />
-                ),
-                Body: () =>
-                  loading ? (
-                    <Box sx={{ padding: 2 }}>Loading incidents...</Box>
-                  ) : (
-                    <IncidentsTableBody rows={incidentsData} />
-                  ),
-                Pagination: () => (
-                  <TablePagination
-                    rowsPerPageOptions={[5, 10, 20, 50, 100].map(n => ({
-                      value: n,
-                      label: `${n} rows`,
-                    }))}
-                    component="div"
-                    sx={{ mr: 1 }}
-                    count={count ?? 0}
-                    rowsPerPage={rowsPerPage}
-                    page={pageNumber}
-                    onPageChange={handlePageChange}
-                    onRowsPerPageChange={handleRowsPerPageChange}
-                    labelRowsPerPage={null}
-                    showFirstButton
-                    showLastButton
-                  />
-                ),
+                Header: IncidentsTableHeaderComponent,
+                Body: IncidentsTableBodyComponent,
+                Pagination: TablePaginationComponent,
               }}
               emptyContent={
                 loading ? null : (
@@ -228,6 +248,7 @@ export const ServicenowContent = () => {
                   </Box>
                 )
               }
+              isLoading={loading}
             />
           )}
         </CatalogFilterLayout.Content>
