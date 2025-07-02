@@ -43,6 +43,7 @@ describe('IncidentsTableRow', () => {
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 2,
     incidentState: 2,
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed06',
   };
 
   beforeEach(() => {

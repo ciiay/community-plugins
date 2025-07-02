@@ -26,6 +26,7 @@ export const mockIncidents: IncidentsData[] = [
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 1,
     incidentState: 1,
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed06',
   },
   {
     sysId: '46e8219ba9fe1981013806b6e04fed07',
@@ -36,6 +37,7 @@ export const mockIncidents: IncidentsData[] = [
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 3,
     incidentState: 2,
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed07',
   },
   {
     sysId: '46e8219ba9fe1981013806b6e04fed08',
@@ -46,6 +48,7 @@ export const mockIncidents: IncidentsData[] = [
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 2,
     incidentState: 3,
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed08',
   },
   {
     sysId: '46e8219ba9fe1981013806b6e04fed09',
@@ -56,6 +59,7 @@ export const mockIncidents: IncidentsData[] = [
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 4,
     incidentState: 6,
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed09',
   },
   {
     sysId: '46e8219ba9fe1981013806b6e04fed10',
@@ -66,6 +70,7 @@ export const mockIncidents: IncidentsData[] = [
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 5,
     incidentState: 8,
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed10',
   },
   {
     sysId: '46e8219ba9fe1981013806b6e04fed11',
@@ -76,5 +81,6 @@ export const mockIncidents: IncidentsData[] = [
     sysCreatedOn: '2016-12-12 15:19:57',
     priority: 4,
     incidentState: 7,
+    url: 'https://dev-test.servicenow.com/nav_to.do?uri=incident.do?sys_id=46e8219ba9fe1981013806b6e04fed11',
   },
 ];

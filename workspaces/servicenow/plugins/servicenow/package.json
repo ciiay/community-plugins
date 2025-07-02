@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@backstage-community/plugin-servicenow-common": "workspace:^",
+    "@backstage/catalog-model": "^1.7.4",
     "@backstage/core-components": "^0.17.2",
     "@backstage/core-plugin-api": "^1.10.7",
     "@backstage/plugin-catalog-react": "^1.18.0",
@@ -56,11 +57,13 @@
     "@backstage/core-app-api": "^1.17.0",
     "@backstage/dev-utils": "^1.1.10",
     "@backstage/test-utils": "^1.7.8",
+    "@material-ui/core": "^4.12.4",
     "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.0.0",
     "msw": "^1.0.0",
-    "react": "^16.13.1 || ^17.0.0 || ^18.0.0"
+    "react": "^16.13.1 || ^17.0.0 || ^18.0.0",
+    "rxjs": "^7.8.2"
   },
   "files": [
     "dist"

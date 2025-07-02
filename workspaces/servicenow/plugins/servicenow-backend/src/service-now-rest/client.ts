@@ -22,15 +22,12 @@ import {
   AccessToken,
 } from 'simple-oauth2';
 import axios from 'axios';
-import {
-  IncidentPick,
-  ServiceAnnotationFieldName,
-} from '@backstage-community/plugin-servicenow-common';
+import { IncidentPick } from '@backstage-community/plugin-servicenow-common';
 import { OAuthConfig, ServiceNowConfig } from '../../config';
 
 export type IncidentQueryParams = {
-  entityId: string;
-  userEmail: string;
+  userEmail?: string;
+  entityId?: string;
   state?: string;
   priority?: string;
   search?: string;
@@ -41,7 +38,9 @@ export type IncidentQueryParams = {
 };
 
 export interface ServiceNowClient {
-  fetchIncidents(options: IncidentQueryParams): Promise<IncidentPick[]>;
+  fetchIncidents(
+    options: IncidentQueryParams,
+  ): Promise<{ items: IncidentPick[]; totalCount: number }>;
 }
 
 export class DefaultServiceNowClient implements ServiceNowClient {
@@ -203,9 +202,11 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     throw new Error('No authentication method configured.');
   }
 
-  async fetchIncidents(options: IncidentQueryParams): Promise<IncidentPick[]> {
+  async fetchIncidents(options: IncidentQueryParams): Promise<{
+    items: IncidentPick[];
+    totalCount: number;
+  }> {
     const authHeaders = await this.getAuthHeaders();
-    const params = new URLSearchParams();
     const queryParts: string[] = [];
 
     if (options.userEmail) {
@@ -228,23 +229,49 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     }
 
     if (options.orderBy) {
-      if (options.order === 'desc') {
-        queryParts.push(`ORDERBYDESC${options.orderBy}`);
-      } else {
-        queryParts.push(`ORDERBY${options.orderBy}`);
-      }
+      queryParts.push(
+        `${options.order === 'desc' ? 'ORDERBYDESC' : 'ORDERBY'}${
+          options.orderBy
+        }`,
+      );
     }
 
-    if (queryParts.length > 0) {
-      params.append('sysparm_query', queryParts.join('^'));
+    const sysparmQuery = queryParts.join('^');
+
+    let totalCount = 0;
+    try {
+      const countRes = await axios.get(
+        `${this.instanceUrl}/api/now/table/incident`,
+        {
+          headers: {
+            ...authHeaders,
+            Accept: 'application/json',
+          },
+          params: {
+            sysparm_query: sysparmQuery,
+            sysparm_fields: 'sys_id',
+            sysparm_limit: 1,
+            sysparm_offset: 0,
+            sysparm_count: 'true',
+          },
+        },
+      );
+
+      const countHeader =
+        countRes.headers['x-total-count'] || countRes.headers['X-Total-Count']; // case-insensitive
+      totalCount = Number(countHeader ?? 0);
+    } catch (err) {
+      this.logger.warn('Unable to fetch total count from ServiceNow.', {
+        error: err,
+      });
     }
 
-    if (options.limit !== undefined) {
+    const params = new URLSearchParams();
+    if (sysparmQuery) params.append('sysparm_query', sysparmQuery);
+    if (options.limit !== undefined)
       params.append('sysparm_limit', String(options.limit));
-    }
-    if (options.offset !== undefined) {
+    if (options.offset !== undefined)
       params.append('sysparm_offset', String(options.offset));
-    }
     params.append(
       'sysparm_fields',
       'sys_id,number,short_description,description,sys_created_on,priority,incident_state',
@@ -253,9 +280,7 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     const requestUrl = `${
       this.instanceUrl
     }/api/now/table/incident?${params.toString()}`;
-    this.logger.info(
-      `Fetching incidents from ServiceNow: ${this.instanceUrl}/api/now/table/incident?...`,
-    );
+    this.logger.info(`Fetching incidents from ServiceNow: ${requestUrl}`);
 
     try {
       const response = await axios.get(requestUrl, {
@@ -265,31 +290,19 @@ export class DefaultServiceNowClient implements ServiceNowClient {
         },
         timeout: 30000,
       });
-      if (response.data && Array.isArray(response.data.result)) {
-        this.logger.debug(
-          `Successfully fetched ${response.data.result.length} incidents.`,
-        );
-        return response.data.result;
-      }
-      this.logger.warn('ServiceNow incidents response format unexpected.', {
-        responseData: response.data,
-      });
-      return [];
+
+      const items =
+        response.data?.result?.map((incident: any) => ({
+          ...incident,
+          url: `${this.instanceUrl}/nav_to.do?uri=incident.do?sys_id=${incident.sys_id}`,
+        })) ?? [];
+
+      return { items, totalCount };
     } catch (error: any) {
-      this.logger.error(
-        `Error fetching incidents from ServiceNow: ${error.message}`,
-        { error: error.stack || error },
-      );
-      if (axios.isAxiosError(error) && error.response) {
-        this.logger.error(
-          `ServiceNow API Error Details: Status ${
-            error.response.status
-          }, Data: ${JSON.stringify(error.response.data)}`,
-        );
-      }
-      throw new Error(
-        `Failed to fetch incidents from ServiceNow: ${error.message}`,
-      );
+      this.logger.error(`Failed to fetch incidents: ${error.message}`, {
+        error,
+      });
+      throw new Error(`Failed to fetch incidents: ${error.message}`);
     }
   }
 

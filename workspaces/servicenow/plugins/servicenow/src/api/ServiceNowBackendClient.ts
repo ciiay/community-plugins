@@ -23,7 +23,9 @@ import {
 import { IncidentsData } from '../types';
 
 export interface ServiceNowBackendAPI {
-  getIncidents(queryParams: URLSearchParams): Promise<IncidentsData[]>;
+  getIncidents(
+    queryParams: URLSearchParams,
+  ): Promise<{ incidents: IncidentsData[]; totalCount: number }>;
 }
 
 export const serviceNowApiRef = createApiRef<ServiceNowBackendAPI>({
@@ -40,7 +42,7 @@ export class ServiceNowBackendClient implements ServiceNowBackendAPI {
   private async fetchFromServiceNow<T>(
     path: string,
     queryParams?: URLSearchParams,
-  ): Promise<T> {
+  ): Promise<{ items: T; totalCount: number }> {
     const proxyBase = await this.discoveryApi.getBaseUrl('servicenow');
     const url = `${proxyBase}${path}${queryParams ? `?${queryParams}` : ''}`;
 
@@ -48,17 +50,24 @@ export class ServiceNowBackendClient implements ServiceNowBackendAPI {
     const headers = {
       Authorization: `Bearer ${token}`,
     };
+
     const response = await this.fetchApi.fetch(url, { headers });
     if (!response.ok) {
       throw new Error(`ServiceNow API request failed: ${response.status}`);
     }
-    return (await response.json()) as T;
+
+    return (await response.json()) as { items: T; totalCount: number };
   }
 
-  async getIncidents(queryParams: URLSearchParams): Promise<IncidentsData[]> {
-    return incidentsPickToIncidentsData(
-      await this.fetchFromServiceNow<IncidentPick[]>('/incidents', queryParams),
-    );
+  async getIncidents(
+    queryParams: URLSearchParams,
+  ): Promise<{ incidents: IncidentsData[]; totalCount: number }> {
+    const { items, totalCount } = await this.fetchFromServiceNow<
+      IncidentPick[]
+    >('/incidents', queryParams);
+
+    const incidents = incidentsPickToIncidentsData(items);
+    return { incidents, totalCount };
   }
 }
 
@@ -71,5 +80,6 @@ function incidentsPickToIncidentsData(data: IncidentPick[]): IncidentsData[] {
     sysCreatedOn: item.sys_created_on,
     priority: item.priority,
     incidentState: item.incident_state,
+    url: item.url,
   }));
 }
