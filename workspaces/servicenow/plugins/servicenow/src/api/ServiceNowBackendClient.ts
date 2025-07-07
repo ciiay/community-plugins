@@ -20,12 +20,10 @@ import {
   FetchApi,
   IdentityApi,
 } from '@backstage/core-plugin-api';
-import { IncidentsData } from '../types';
+import { IncidentsData, PaginatedIncidentsData } from '../types';
 
 export interface ServiceNowBackendAPI {
-  getIncidents(
-    queryParams: URLSearchParams,
-  ): Promise<{ incidents: IncidentsData[]; totalCount: number }>;
+  getIncidents(queryParams: URLSearchParams): Promise<PaginatedIncidentsData>;
 }
 
 export const serviceNowApiRef = createApiRef<ServiceNowBackendAPI>({
@@ -61,7 +59,7 @@ export class ServiceNowBackendClient implements ServiceNowBackendAPI {
 
   async getIncidents(
     queryParams: URLSearchParams,
-  ): Promise<{ incidents: IncidentsData[]; totalCount: number }> {
+  ): Promise<PaginatedIncidentsData> {
     const { items, totalCount } = await this.fetchFromServiceNow<
       IncidentPick[]
     >('/incidents', queryParams);

@@ -43,3 +43,8 @@ export const IncidentTableFieldEnum: IncidentTableFieldEnumType = {
 
 export type IncidentTableField =
   (typeof IncidentTableFieldEnum)[keyof typeof IncidentTableFieldEnum];
+
+export type PaginatedIncidentsData = {
+  incidents: IncidentsData[];
+  totalCount: number;
+};

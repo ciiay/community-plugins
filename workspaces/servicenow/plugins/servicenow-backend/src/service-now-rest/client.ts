@@ -22,7 +22,10 @@ import {
   AccessToken,
 } from 'simple-oauth2';
 import axios from 'axios';
-import { IncidentPick } from '@backstage-community/plugin-servicenow-common';
+import {
+  IncidentPick,
+  PaginatedIncidents,
+} from '@backstage-community/plugin-servicenow-common';
 import { OAuthConfig, ServiceNowConfig } from '../../config';
 
 export type IncidentQueryParams = {
@@ -38,9 +41,7 @@ export type IncidentQueryParams = {
 };
 
 export interface ServiceNowClient {
-  fetchIncidents(
-    options: IncidentQueryParams,
-  ): Promise<{ items: IncidentPick[]; totalCount: number }>;
+  fetchIncidents(options: IncidentQueryParams): Promise<PaginatedIncidents>;
 }
 
 export class DefaultServiceNowClient implements ServiceNowClient {
@@ -218,9 +219,9 @@ export class DefaultServiceNowClient implements ServiceNowClient {
     if (options.priority) queryParts.push(`priority${options.priority}`);
 
     if (options.search) {
-      const searchTerm = encodeURIComponent(options.search);
+      const searchTerm = options.search;
       queryParts.push(
-        `short_descriptionLIKE${searchTerm}^ORdescriptionLIKE${searchTerm}`,
+        `numberLIKE${searchTerm}^ORshort_descriptionLIKE${searchTerm}^ORdescriptionLIKE${searchTerm}`,
       );
     }
 
@@ -238,34 +239,6 @@ export class DefaultServiceNowClient implements ServiceNowClient {
 
     const sysparmQuery = queryParts.join('^');
 
-    let totalCount = 0;
-    try {
-      const countRes = await axios.get(
-        `${this.instanceUrl}/api/now/table/incident`,
-        {
-          headers: {
-            ...authHeaders,
-            Accept: 'application/json',
-          },
-          params: {
-            sysparm_query: sysparmQuery,
-            sysparm_fields: 'sys_id',
-            sysparm_limit: 1,
-            sysparm_offset: 0,
-            sysparm_count: 'true',
-          },
-        },
-      );
-
-      const countHeader =
-        countRes.headers['x-total-count'] || countRes.headers['X-Total-Count']; // case-insensitive
-      totalCount = Number(countHeader ?? 0);
-    } catch (err) {
-      this.logger.warn('Unable to fetch total count from ServiceNow.', {
-        error: err,
-      });
-    }
-
     const params = new URLSearchParams();
     if (sysparmQuery) params.append('sysparm_query', sysparmQuery);
     if (options.limit !== undefined)
@@ -276,6 +249,8 @@ export class DefaultServiceNowClient implements ServiceNowClient {
       'sysparm_fields',
       'sys_id,number,short_description,description,sys_created_on,priority,incident_state',
     );
+
+    params.append('sysparm_count', 'true');
 
     const requestUrl = `${
       this.instanceUrl
@@ -290,6 +265,10 @@ export class DefaultServiceNowClient implements ServiceNowClient {
         },
         timeout: 30000,
       });
+
+      const countHeader =
+        response.headers['x-total-count'] ?? response.headers['X-Total-Count'];
+      const totalCount = Number(countHeader ?? 0);
 
       const items =
         response.data?.result?.map((incident: any) => ({

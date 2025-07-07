@@ -83,3 +83,11 @@ export type Order = SortingOrderEnumType[keyof SortingOrderEnumType];
  * @public
  */
 export const ServiceAnnotationFieldName = 'servicenow.com/entity-id';
+
+/**
+ * Represents a paginated response for ServiceNow incidents.
+ * Contains the list of incidents for the current page and the total number of incidents matching the query.
+ * Used to support pagination in both frontend and backend when displaying or processing incident data.
+ * @public
+ */
+export type PaginatedIncidents = { items: IncidentPick[]; totalCount: number };
