@@ -30,6 +30,12 @@ export type IncidentPick = {
 export type Order = SortingOrderEnumType[keyof SortingOrderEnumType];
 
 // @public
+export type PaginatedIncidents = {
+  items: IncidentPick[];
+  totalCount: number;
+};
+
+// @public
 export const ServiceAnnotationFieldName = 'servicenow.com/entity-id';
 
 // @public
