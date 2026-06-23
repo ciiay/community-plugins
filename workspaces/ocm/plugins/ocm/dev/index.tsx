@@ -28,6 +28,8 @@ import { SearchApi, searchApiRef } from '@backstage/plugin-search-react';
 
 import { Grid } from '@material-ui/core';
 
+import { ANNOTATION_PROVIDER_ID } from '@backstage-community/plugin-ocm-common';
+
 import {
   ClusterAvailableResourceCard,
   ClusterContextProvider,
@@ -43,7 +45,7 @@ const clusterEntity = (name: string): Entity => ({
     name,
     namespace: 'default',
     annotations: {
-      'backstage-community.io/ocm-provider-id': 'hub',
+      [ANNOTATION_PROVIDER_ID]: 'hub',
     },
   },
 });

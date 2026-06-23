@@ -15,11 +15,18 @@
  */
 import { createBackend } from '@backstage/backend-defaults';
 
+import { setupServer } from 'msw/node';
+
+import { handlers } from '../__fixtures__/handlers';
 import { catalogModuleOCMEntityProvider, ocmPlugin } from '../src/';
+
+const server = setupServer(...handlers);
+server.listen({ onUnhandledRequest: 'bypass' });
 
 const backend = createBackend();
 
-// api endpoints from here: https://github.com/backstage/backstage/blob/master/plugins/catalog-backend/src/service/createRouter.ts
+backend.add(import('@backstage/plugin-auth-backend'));
+backend.add(import('@backstage/plugin-auth-backend-module-guest-provider'));
 backend.add(import('@backstage/plugin-catalog-backend'));
 backend.add(catalogModuleOCMEntityProvider);
 backend.add(ocmPlugin);

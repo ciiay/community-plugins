@@ -1907,6 +1907,8 @@ __metadata:
     "@backstage/cli": "npm:^0.36.1"
     "@backstage/config": "npm:^1.3.7"
     "@backstage/errors": "npm:^1.3.0"
+    "@backstage/plugin-auth-backend": "npm:^0.28.0"
+    "@backstage/plugin-auth-backend-module-guest-provider": "npm:^0.2.18"
     "@backstage/plugin-catalog-backend": "npm:^3.6.1"
     "@backstage/plugin-catalog-node": "npm:^2.2.0"
     "@backstage/plugin-permission-common": "npm:^0.9.8"
@@ -5739,6 +5741,8 @@ __metadata:
     typescript: "npm:~5.8.0"
   dependenciesMeta:
     better-sqlite3:
+      built: true
+    isolated-vm:
       built: true
   languageName: unknown
   linkType: soft

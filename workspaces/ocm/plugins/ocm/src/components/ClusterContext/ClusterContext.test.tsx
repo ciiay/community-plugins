@@ -17,6 +17,8 @@ import { useEntity } from '@backstage/plugin-catalog-react';
 
 import { render } from '@testing-library/react';
 
+import { ANNOTATION_PROVIDER_ID } from '@backstage-community/plugin-ocm-common';
+
 import data from '../../../__fixtures__/cluster1.json';
 import { ClusterContextProvider } from './ClusterContext';
 
@@ -28,7 +30,7 @@ const mockEntity = {
     name: 'foo',
     namespace: 'default',
     annotations: {
-      'backstage-community.io/ocm-provider-id': 'hub',
+      [ANNOTATION_PROVIDER_ID]: 'hub',
     },
   },
 };
