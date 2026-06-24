@@ -1,0 +1,9 @@
+@layer components {
+  .upgradeButton {
+    text-transform: none;
+    border-radius: var(--bui-radius-full);
+    margin: 0;
+    padding-left: var(--bui-space-1);
+    padding-right: var(--bui-space-1);
+  }
+}

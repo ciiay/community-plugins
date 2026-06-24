@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import type { JSX } from 'react';
-
-import { Entity } from '@backstage/catalog-model';
+import { Entity, parseEntityRef } from '@backstage/catalog-model';
 import { createApiFactory } from '@backstage/core-plugin-api';
 import { createDevApp } from '@backstage/dev-utils';
-import { CatalogEntityPage } from '@backstage/plugin-catalog';
 import {
-  CatalogApi,
-  catalogApiRef,
-  EntityProvider,
-} from '@backstage/plugin-catalog-react';
+  CatalogEntityPage,
+  CatalogIndexPage,
+  catalogPlugin,
+  EntityLayout,
+  EntitySwitch,
+} from '@backstage/plugin-catalog';
+import { CatalogApi, catalogApiRef } from '@backstage/plugin-catalog-react';
 import { SearchApi, searchApiRef } from '@backstage/plugin-search-react';
+import { Grid } from '@backstage/ui';
 
-import { Grid } from '@material-ui/core';
+// eslint-disable-next-line @backstage/no-ui-css-imports-in-non-frontend
+import '@backstage/ui/css/styles.css';
 
 import { ANNOTATION_PROVIDER_ID } from '@backstage-community/plugin-ocm-common';
 
@@ -50,20 +52,8 @@ const clusterEntity = (name: string): Entity => ({
   },
 });
 
-const clusterEntityPage = (name: string): JSX.Element => (
-  <EntityProvider entity={clusterEntity(name)}>
-    <ClusterContextProvider>
-      <Grid container direction="column" xs={6}>
-        <Grid item>
-          <ClusterInfoCard />
-        </Grid>
-        <Grid item>
-          <ClusterAvailableResourceCard />
-        </Grid>
-      </Grid>
-    </ClusterContextProvider>
-  </EntityProvider>
-);
+const isKubernetesCluster = (entity: Entity) =>
+  entity.spec?.type === 'kubernetes-cluster';
 
 const clusters = [
   clusterEntity('foo'),
@@ -71,19 +61,60 @@ const clusters = [
   clusterEntity('offline-cluster'),
 ];
 
+const findClusterByRef = (
+  ref: string | { kind: string; namespace?: string; name: string },
+) => {
+  const { kind, namespace, name } =
+    typeof ref === 'string' ? parseEntityRef(ref) : ref;
+
+  return clusters.find(
+    entity =>
+      entity.kind.toLowerCase() === kind.toLowerCase() &&
+      (entity.metadata.namespace || 'default') === (namespace || 'default') &&
+      entity.metadata.name === name,
+  );
+};
+
+const matchesEntityFilter = (
+  entity: Entity,
+  filter: Record<string, unknown>,
+) => {
+  if (
+    filter.kind &&
+    entity.kind.toLowerCase() !== String(filter.kind).toLowerCase()
+  ) {
+    return false;
+  }
+
+  if (filter['spec.type'] && entity.spec?.type !== filter['spec.type']) {
+    return false;
+  }
+
+  return true;
+};
+
 createDevApp()
+  .registerPlugin(catalogPlugin)
   .registerApi({
     api: catalogApiRef,
     deps: {},
     factory: () =>
       ({
-        async getEntities() {
-          return {
-            items: clusters,
-          };
+        async getEntities(request?: {
+          filter?: Record<string, unknown> | Record<string, unknown>[];
+        }) {
+          const filter = request?.filter;
+          const items =
+            filter && !Array.isArray(filter)
+              ? clusters.filter(entity => matchesEntityFilter(entity, filter))
+              : clusters;
+
+          return { items };
         },
-        async getEntityByRef(ref: string) {
-          return clusters.find(e => e.metadata.name === ref);
+        async getEntityByRef(
+          ref: string | { kind: string; namespace?: string; name: string },
+        ) {
+          return findClusterByRef(ref);
         },
       } as CatalogApi),
   })
@@ -107,19 +138,35 @@ createDevApp()
     icon: OcmIcon,
   })
   .addPage({
-    path: '/catalog/:kind/:namespace/:name',
+    path: '/catalog',
+    element: <CatalogIndexPage />,
+  })
+  .addPage({
+    path: '/catalog/:namespace/:kind/:name',
     element: <CatalogEntityPage />,
-  })
-  .addPage({
-    path: '/catalog/resource/default/foo',
-    element: clusterEntityPage('foo'),
-  })
-  .addPage({
-    path: '/catalog/resource/default/cluster1',
-    element: clusterEntityPage('cluster1'),
-  })
-  .addPage({
-    path: '/catalog/resource/default/offline-cluster',
-    element: clusterEntityPage('offline-cluster'),
+    children: (
+      <EntityLayout>
+        <EntityLayout.Route path="/status" title="status">
+          <EntitySwitch>
+            <EntitySwitch.Case if={isKubernetesCluster}>
+              <ClusterContextProvider>
+                <Grid.Root
+                  columns={{ sm: '12' }}
+                  gap="4"
+                  style={{ maxWidth: '50%' }}
+                >
+                  <Grid.Item colSpan={{ sm: '12' }}>
+                    <ClusterInfoCard />
+                  </Grid.Item>
+                  <Grid.Item colSpan={{ sm: '12' }}>
+                    <ClusterAvailableResourceCard />
+                  </Grid.Item>
+                </Grid.Root>
+              </ClusterContextProvider>
+            </EntitySwitch.Case>
+          </EntitySwitch>
+        </EntityLayout.Route>
+      </EntityLayout>
+    ),
   })
   .render();

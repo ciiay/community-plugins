@@ -71,7 +71,13 @@ import {
 import { EntityTechdocsContent } from '@backstage/plugin-techdocs';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
-import { Button, Grid } from '@material-ui/core';
+import { ButtonLink, Grid } from '@backstage/ui';
+
+const entityGridProps = {
+  columns: { initial: '1', md: '12' } as const,
+  gap: '3' as const,
+  alignItems: 'stretch' as const,
+};
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -82,29 +88,19 @@ const techdocsContent = (
 );
 
 const cicdContent = (
-  // This is an example of how you can implement your company's logic in entity page.
-  // You can for example enforce that all components of type 'service' should use GitHubActions
   <EntitySwitch>
-    {/*
-      Here you can add support for different CI/CD services, for example
-      using @backstage-community/plugin-github-actions as follows:
-      <EntitySwitch.Case if={isGithubActionsAvailable}>
-        <EntityGithubActionsContent />
-      </EntitySwitch.Case>
-     */}
     <EntitySwitch.Case>
       <EmptyState
         title="No CI/CD available for this entity"
         missing="info"
         description="You need to add an annotation to your component if you want to enable CI/CD for it. You can read more about annotations in Backstage by clicking the button below."
         action={
-          <Button
-            variant="contained"
-            color="primary"
+          <ButtonLink
+            variant="primary"
             href="https://backstage.io/docs/features/software-catalog/well-known-annotations"
           >
             Read more
-          </Button>
+          </ButtonLink>
         }
       />
     </EntitySwitch.Case>
@@ -115,47 +111,57 @@ const entityWarningContent = (
   <>
     <EntitySwitch>
       <EntitySwitch.Case if={isOrphan}>
-        <Grid item xs={12}>
+        <Grid.Item colSpan="12">
           <EntityOrphanWarning />
-        </Grid>
+        </Grid.Item>
       </EntitySwitch.Case>
     </EntitySwitch>
 
     <EntitySwitch>
       <EntitySwitch.Case if={hasRelationWarnings}>
-        <Grid item xs={12}>
+        <Grid.Item colSpan="12">
           <EntityRelationWarning />
-        </Grid>
+        </Grid.Item>
       </EntitySwitch.Case>
     </EntitySwitch>
 
     <EntitySwitch>
       <EntitySwitch.Case if={hasCatalogProcessingErrors}>
-        <Grid item xs={12}>
+        <Grid.Item colSpan="12">
           <EntityProcessingErrorsPanel />
-        </Grid>
+        </Grid.Item>
       </EntitySwitch.Case>
     </EntitySwitch>
   </>
 );
 
 const overviewContent = (
-  <Grid container spacing={3} alignItems="stretch">
+  <Grid.Root {...entityGridProps}>
     {entityWarningContent}
-    <Grid item md={6}>
+    <Grid.Item colSpan={{ md: '6' }}>
       <EntityAboutCard />
-    </Grid>
-    <Grid item md={6} xs={12}>
+    </Grid.Item>
+    <Grid.Item colSpan={{ initial: '12', md: '6' }}>
       <EntityCatalogGraphCard height={400} />
-    </Grid>
-
-    <Grid item md={4} xs={12}>
+    </Grid.Item>
+    <Grid.Item colSpan={{ initial: '12', md: '4' }}>
       <EntityLinksCard />
-    </Grid>
-    <Grid item md={8} xs={12}>
+    </Grid.Item>
+    <Grid.Item colSpan={{ initial: '12', md: '8' }}>
       <EntityHasSubcomponentsCard />
-    </Grid>
-  </Grid>
+    </Grid.Item>
+  </Grid.Root>
+);
+
+const twoColumnCards = (
+  <>
+    <Grid.Item colSpan={{ md: '6' }}>
+      <EntityDependsOnComponentsCard />
+    </Grid.Item>
+    <Grid.Item colSpan={{ md: '6' }}>
+      <EntityDependsOnResourcesCard />
+    </Grid.Item>
+  </>
 );
 
 const serviceEntityPage = (
@@ -169,25 +175,18 @@ const serviceEntityPage = (
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/api" title="API">
-      <Grid container spacing={3} alignItems="stretch">
-        <Grid item md={6}>
+      <Grid.Root {...entityGridProps}>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityProvidedApisCard />
-        </Grid>
-        <Grid item md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityConsumedApisCard />
-        </Grid>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
-      <Grid container spacing={3} alignItems="stretch">
-        <Grid item md={6}>
-          <EntityDependsOnComponentsCard />
-        </Grid>
-        <Grid item md={6}>
-          <EntityDependsOnResourcesCard />
-        </Grid>
-      </Grid>
+      <Grid.Root {...entityGridProps}>{twoColumnCards}</Grid.Root>
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">
@@ -207,14 +206,7 @@ const websiteEntityPage = (
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/dependencies" title="Dependencies">
-      <Grid container spacing={3} alignItems="stretch">
-        <Grid item md={6}>
-          <EntityDependsOnComponentsCard />
-        </Grid>
-        <Grid item md={6}>
-          <EntityDependsOnResourcesCard />
-        </Grid>
-      </Grid>
+      <Grid.Root {...entityGridProps}>{twoColumnCards}</Grid.Root>
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">
@@ -222,13 +214,6 @@ const websiteEntityPage = (
     </EntityLayout.Route>
   </EntityLayout>
 );
-
-/**
- * NOTE: This page is designed to work on small screens such as mobile devices.
- * This is based on Material UI Grid. If breakpoints are used, each grid item must set the `xs` prop to a column size or to `true`,
- * since this does not default. If no breakpoints are used, the items will equitably share the available space.
- * https://material-ui.com/components/grid/#basic-grid.
- */
 
 const defaultEntityPage = (
   <EntityLayout>
@@ -259,34 +244,36 @@ const componentPage = (
 const apiPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      <Grid container spacing={3}>
+      <Grid.Root {...entityGridProps}>
         {entityWarningContent}
-        <Grid item md={6}>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityAboutCard />
-        </Grid>
-        <Grid item md={6} xs={12}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityCatalogGraphCard height={400} />
-        </Grid>
-        <Grid item md={4} xs={12}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '4' }}>
           <EntityLinksCard />
-        </Grid>
-        <Grid container item md={12}>
-          <Grid item md={6}>
-            <EntityProvidingComponentsCard />
-          </Grid>
-          <Grid item md={6}>
-            <EntityConsumingComponentsCard />
-          </Grid>
-        </Grid>
-      </Grid>
+        </Grid.Item>
+        <Grid.Item colSpan="12">
+          <Grid.Root {...entityGridProps}>
+            <Grid.Item colSpan={{ md: '6' }}>
+              <EntityProvidingComponentsCard />
+            </Grid.Item>
+            <Grid.Item colSpan={{ md: '6' }}>
+              <EntityConsumingComponentsCard />
+            </Grid.Item>
+          </Grid.Root>
+        </Grid.Item>
+      </Grid.Root>
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/definition" title="Definition">
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
+      <Grid.Root {...entityGridProps}>
+        <Grid.Item colSpan="12">
           <EntityApiDefinitionCard />
-        </Grid>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </EntityLayout.Route>
   </EntityLayout>
 );
@@ -294,15 +281,15 @@ const apiPage = (
 const userPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      <Grid container spacing={3}>
+      <Grid.Root {...entityGridProps}>
         {entityWarningContent}
-        <Grid item xs={12} md={6}>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityUserProfileCard />
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityOwnershipCard />
-        </Grid>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </EntityLayout.Route>
   </EntityLayout>
 );
@@ -310,21 +297,21 @@ const userPage = (
 const groupPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      <Grid container spacing={3}>
+      <Grid.Root {...entityGridProps}>
         {entityWarningContent}
-        <Grid item xs={12} md={6}>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityGroupProfileCard />
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityOwnershipCard />
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityMembersListCard />
-        </Grid>
-        <Grid item xs={12} md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityLinksCard />
-        </Grid>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </EntityLayout.Route>
   </EntityLayout>
 );
@@ -332,27 +319,27 @@ const groupPage = (
 const systemPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      <Grid container spacing={3} alignItems="stretch">
+      <Grid.Root {...entityGridProps}>
         {entityWarningContent}
-        <Grid item md={6}>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityAboutCard />
-        </Grid>
-        <Grid item md={6} xs={12}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityCatalogGraphCard height={400} />
-        </Grid>
-        <Grid item md={4} xs={12}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '4' }}>
           <EntityLinksCard />
-        </Grid>
-        <Grid item md={8}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ md: '8' }}>
           <EntityHasComponentsCard />
-        </Grid>
-        <Grid item md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityHasApisCard />
-        </Grid>
-        <Grid item md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityHasResourcesCard />
-        </Grid>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </EntityLayout.Route>
     <EntityLayout.Route path="/diagram" title="Diagram">
       <EntityCatalogGraphCard
@@ -378,18 +365,18 @@ const systemPage = (
 const domainPage = (
   <EntityLayout>
     <EntityLayout.Route path="/" title="Overview">
-      <Grid container spacing={3} alignItems="stretch">
+      <Grid.Root {...entityGridProps}>
         {entityWarningContent}
-        <Grid item md={6}>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityAboutCard />
-        </Grid>
-        <Grid item md={6} xs={12}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ initial: '12', md: '6' }}>
           <EntityCatalogGraphCard height={400} />
-        </Grid>
-        <Grid item md={6}>
+        </Grid.Item>
+        <Grid.Item colSpan={{ md: '6' }}>
           <EntityHasSystemsCard />
-        </Grid>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </EntityLayout.Route>
   </EntityLayout>
 );
@@ -405,25 +392,22 @@ const isType = (types: string | string[]) => (entity: Entity) => {
 
 export const resourcePage = (
   <EntityLayout>
-    {/* ... */}
-    {/* highlight-add-start */}
     <EntityLayout.Route path="/status" title="status">
       <EntitySwitch>
         <EntitySwitch.Case if={isType('kubernetes-cluster')}>
           <ClusterContextProvider>
-            <Grid container direction="column" xs={6}>
-              <Grid item>
+            <Grid.Root columns={{ initial: '1', md: '12' }} gap="3">
+              <Grid.Item colSpan={{ initial: '12', md: '6' }}>
                 <ClusterInfoCard />
-              </Grid>
-              <Grid item>
+              </Grid.Item>
+              <Grid.Item colSpan={{ initial: '12', md: '6' }}>
                 <ClusterAvailableResourceCard />
-              </Grid>
-            </Grid>
+              </Grid.Item>
+            </Grid.Root>
           </ClusterContextProvider>
         </EntitySwitch.Case>
       </EntitySwitch>
     </EntityLayout.Route>
-    {/* highlight-add-end */}
   </EntityLayout>
 );
 

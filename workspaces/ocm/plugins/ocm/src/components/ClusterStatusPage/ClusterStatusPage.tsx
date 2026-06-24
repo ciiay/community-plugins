@@ -23,6 +23,7 @@ import {
   ErrorPanel,
   Header,
   Page,
+  Progress,
   StatusAborted,
   StatusError,
   StatusOK,
@@ -32,8 +33,7 @@ import { useApi } from '@backstage/core-plugin-api';
 import { catalogApiRef, EntityRefLink } from '@backstage/plugin-catalog-react';
 import { RequirePermission } from '@backstage/plugin-permission-react';
 import { SearchContextProvider } from '@backstage/plugin-search-react';
-
-import { Box, Chip, CircularProgress } from '@material-ui/core';
+import { Box, Tag, TagGroup } from '@backstage/ui';
 
 import {
   ClusterNodesStatus,
@@ -44,23 +44,25 @@ import {
 import { OcmApiRef } from '../../api';
 import { ClusterStatusRowData } from '../../types';
 import { Status, Update } from '../common';
+import styles from './ClusterStatusPage.module.css';
 import { columns } from './tableHeading';
 
 const NodeChip = ({
   count,
+  id,
   indicatorComponent: IndicatorComponent,
 }: {
   count: number;
+  id: string;
   indicatorComponent: FC<PropsWithChildren<{}>>;
 }) => {
   if (!count) {
     return null;
   }
   return (
-    <Chip
-      label={<IndicatorComponent>{count}</IndicatorComponent>}
-      variant="outlined"
-    />
+    <Tag id={id} size="small">
+      <IndicatorComponent>{count}</IndicatorComponent>
+    </Tag>
   );
 };
 
@@ -76,14 +78,34 @@ const NodeChips = ({ nodes }: { nodes: ClusterNodesStatus[] }) => {
   }
 
   return (
-    <>
-      <NodeChip count={readyChipsNodes} indicatorComponent={StatusOK} />
-      <NodeChip count={notReadyNodesCount} indicatorComponent={StatusError} />
-      <NodeChip
-        count={nodes.length - readyChipsNodes - notReadyNodesCount}
-        indicatorComponent={StatusAborted}
-      />
-    </>
+    <TagGroup aria-label="Node status">
+      {[
+        {
+          id: 'ready-nodes',
+          count: readyChipsNodes,
+          indicatorComponent: StatusOK,
+        },
+        {
+          id: 'not-ready-nodes',
+          count: notReadyNodesCount,
+          indicatorComponent: StatusError,
+        },
+        {
+          id: 'unknown-nodes',
+          count: nodes.length - readyChipsNodes - notReadyNodesCount,
+          indicatorComponent: StatusAborted,
+        },
+      ]
+        .filter(chip => chip.count > 0)
+        .map(chip => (
+          <NodeChip
+            key={chip.id}
+            id={chip.id}
+            count={chip.count}
+            indicatorComponent={chip.indicatorComponent}
+          />
+        ))}
+    </TagGroup>
   );
 };
 
@@ -137,8 +159,8 @@ const CatalogClusters = () => {
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center' }}>
-        <CircularProgress />
+      <div className={styles.loadingContainer}>
+        <Progress />
       </div>
     );
   }
@@ -183,11 +205,7 @@ export const ClusterStatusPage = ({ logo }: { logo?: ReactNode }) => {
         <Page themeId="clusters">
           <Header title="Your Managed Clusters" />
           <Content>
-            {logo && (
-              <Box sx={{ textAlign: 'center', maxHeight: 150, mt: 5, mb: 5 }}>
-                {logo}
-              </Box>
-            )}
+            {logo && <Box className={styles.logoContainer}>{logo}</Box>}
             <CatalogClusters />
           </Content>
         </Page>

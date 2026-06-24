@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ComponentType } from 'react';
-
 import {
   configApiRef,
   createApiFactory,
@@ -23,9 +21,8 @@ import {
   identityApiRef,
 } from '@backstage/core-plugin-api';
 
-import HubOutlinedIcon from '@mui/icons-material/HubOutlined';
-
 import { OcmApiClient, OcmApiRef } from './api';
+import { OcmIcon } from './components/OcmIcon';
 import { rootRouteRef } from './routes';
 
 /**
@@ -61,9 +58,4 @@ export const OcmPage = ocmPlugin.provide(
   }),
 );
 
-/**
- * @public
- */
-export const OcmIcon = HubOutlinedIcon as ComponentType<{
-  fontSize?: 'medium' | 'large' | 'small' | 'inherit';
-}>;
+export { OcmIcon };

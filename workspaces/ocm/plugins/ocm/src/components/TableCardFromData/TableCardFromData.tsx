@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 import { Link, Table } from '@backstage/core-components';
-
-import { Card, CardContent, CardHeader } from '@material-ui/core';
+import { Card, CardBody, CardHeader } from '@backstage/ui';
 
 const convertToGibibytes = (kibibytes: string): string => {
   const sizeInKibibytes = parseInt(
@@ -68,8 +67,8 @@ export const TableCardFromData = ({
 
   return (
     <Card>
-      <CardHeader title={title} />
-      <CardContent style={{ padding: 0 }}>
+      <CardHeader>{title}</CardHeader>
+      <CardBody style={{ padding: 0 }}>
         <Table
           options={{
             search: false,
@@ -89,7 +88,7 @@ export const TableCardFromData = ({
             { field: 'value' },
           ]}
         />
-      </CardContent>
+      </CardBody>
     </Card>
   );
 };

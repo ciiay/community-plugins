@@ -18,23 +18,14 @@ import {
   StatusError,
   StatusOK,
 } from '@backstage/core-components';
+import { ButtonLink, Flex, Text, Tooltip, TooltipTrigger } from '@backstage/ui';
 
-import { Button, Grid, makeStyles, Tooltip } from '@material-ui/core';
-import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
+import { RiArrowUpCircleLine } from '@remixicon/react';
 
 import { ClusterStatus } from '@backstage-community/plugin-ocm-common';
 
 import { versionDetails } from '../types';
-
-const useStyles = makeStyles({
-  button: {
-    textTransform: 'none',
-    borderRadius: 16,
-    margin: '0px',
-    paddingLeft: '4px',
-    paddingRight: '4px',
-  },
-});
+import styles from './common.module.css';
 
 export const Status = ({ status }: { status: ClusterStatus }) => {
   if (!status) {
@@ -46,27 +37,25 @@ export const Status = ({ status }: { status: ClusterStatus }) => {
 };
 
 export const Update = ({ data }: { data: versionDetails }) => {
-  const classes = useStyles();
   return (
     <>
       {data.update.available ? (
-        <Grid container direction="column" spacing={0}>
-          <Grid item>{data.version}</Grid>
-          <Grid item>
-            <Tooltip title={`Version ${data.update.version!} available`}>
-              <Button
-                variant="text"
-                color="primary"
-                startIcon={<ArrowCircleUpIcon />}
-                className={classes.button}
-                href={data.update.url}
-                size="small"
-              >
+        <Flex direction="column">
+          <Text>{data.version}</Text>
+          <TooltipTrigger>
+            <ButtonLink
+              href={data.update.url}
+              variant="secondary"
+              className={styles.upgradeButton}
+            >
+              <Flex align="center" style={{ gap: 'var(--bui-space-1)' }}>
+                <RiArrowUpCircleLine size={16} aria-hidden />
                 Upgrade available
-              </Button>
-            </Tooltip>
-          </Grid>
-        </Grid>
+              </Flex>
+            </ButtonLink>
+            <Tooltip>{`Version ${data.update.version!} available`}</Tooltip>
+          </TooltipTrigger>
+        </Flex>
       ) : (
         data.version
       )}

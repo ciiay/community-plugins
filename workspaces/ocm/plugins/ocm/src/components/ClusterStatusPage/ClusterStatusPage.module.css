@@ -1,0 +1,12 @@
+@layer components {
+  .logoContainer {
+    text-align: center;
+    max-height: 150px;
+    margin-top: var(--bui-space-8);
+    margin-bottom: var(--bui-space-8);
+  }
+
+  .loadingContainer {
+    text-align: center;
+  }
+}
